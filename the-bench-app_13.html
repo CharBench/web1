@@ -1,0 +1,2208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Bench — Operations Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Aptos:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--green:#73bf43;--green-dark:#5a9e32;--green-light:#e9f5df;--green-xlight:#f4faf0;--grey:#58585a;--grey-light:#e8e8e8;--grey-xlight:#f5f5f5;--white:#ffffff;--text:#2d2d2e;--text-muted:#6b6b6d;--border:#d8d8d8;--radius:10px;--radius-sm:6px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Aptos','Calibri Light',Calibri,sans-serif;background:var(--grey-xlight);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5;}
+  /* NAV */
+  nav{background:var(--white);border-bottom:2px solid var(--green);padding:0 2rem;display:flex;align-items:center;height:60px;gap:2rem;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+  .nav-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;color:var(--grey);cursor:pointer;}
+  .nav-logo-mark{width:32px;height:32px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:16px;}
+  .nav-links{display:flex;gap:.25rem;flex:1;}
+  .nav-link{padding:.4rem .85rem;border-radius:var(--radius-sm);font-size:13.5px;font-weight:400;color:var(--text-muted);cursor:pointer;border:none;background:none;transition:all .15s;display:flex;align-items:center;gap:6px;font-family:inherit;}
+  .nav-link:hover{background:var(--green-xlight);color:var(--green-dark);}
+  .nav-link.active{background:var(--green-light);color:var(--green-dark);font-weight:700;}
+  .nav-link svg{width:16px;height:16px;flex-shrink:0;}
+  .nav-avatar{width:30px;height:30px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:12px;}
+  /* LAYOUT */
+  main{max-width:1200px;margin:0 auto;padding:2rem 1.5rem;}
+  .view{display:none;}.view.active{display:block;}
+  /* DASHBOARD */
+  .db-header{margin-bottom:2rem;}.db-header h1{font-size:26px;font-weight:700;margin-bottom:4px;}.db-header p{color:var(--text-muted);}
+  .module-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.5rem;margin-bottom:2.5rem;}
+  .module-card{background:var(--white);border-radius:var(--radius);border:1.5px solid var(--border);padding:1.5rem;cursor:pointer;transition:all .18s;position:relative;overflow:hidden;}
+  .module-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--green);transform:scaleX(0);transform-origin:left;transition:transform .2s;}
+  .module-card:hover{border-color:var(--green);box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateY(-2px);}
+  .module-card:hover::before{transform:scaleX(1);}
+  .module-icon{width:48px;height:48px;background:var(--green-light);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;color:var(--green-dark);}
+  .module-icon svg{width:24px;height:24px;}
+  .module-card h2{font-size:17px;font-weight:700;margin-bottom:6px;}
+  .module-card p{font-size:13px;color:var(--text-muted);line-height:1.5;margin-bottom:1.25rem;}
+  .module-meta{display:flex;gap:.75rem;flex-wrap:wrap;}
+  .module-cta{display:inline-flex;align-items:center;gap:6px;margin-top:.75rem;font-size:13px;font-weight:700;color:var(--green-dark);}
+  /* BADGES */
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;}
+  .badge-green{background:var(--green-light);color:var(--green-dark);}
+  .badge-grey{background:var(--grey-light);color:var(--grey);}
+  /* BUTTONS */
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:.5rem 1.1rem;border-radius:var(--radius-sm);font-size:13.5px;font-weight:700;cursor:pointer;transition:all .15s;border:none;font-family:inherit;}
+  .btn svg{width:15px;height:15px;}
+  .btn-primary{background:var(--green);color:white;}.btn-primary:hover{background:var(--green-dark);}
+  .btn-secondary{background:var(--white);color:var(--text);border:1.5px solid var(--border);}.btn-secondary:hover{border-color:var(--green);color:var(--green-dark);}
+  .btn-ghost{background:none;color:var(--text-muted);border:none;}.btn-ghost:hover{color:var(--green-dark);}
+  .btn-sm{padding:.3rem .75rem;font-size:12.5px;}
+  .link-btn{background:none;border:none;color:var(--green-dark);font-size:12px;font-family:inherit;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:0;text-decoration:none;}
+  .link-btn:hover{text-decoration:underline;}.link-btn svg{width:12px;height:12px;}
+  /* SECTION HEADER */
+  .section-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;}
+  .section-header h1{font-size:22px;font-weight:700;flex:1;}
+  /* PANEL */
+  .panel-layout{display:grid;grid-template-columns:260px 1fr;gap:1.5rem;align-items:start;}
+  .sidebar-panel{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+  .spanel-header{padding:.85rem 1rem;border-bottom:1px solid var(--border);font-weight:700;font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;display:flex;justify-content:space-between;align-items:center;}
+  /* FORM LIST */
+  .fli{padding:.85rem 1rem;border-bottom:1px solid var(--grey-xlight);cursor:pointer;transition:background .12s;display:flex;align-items:flex-start;gap:8px;}
+  .fli:hover{background:var(--green-xlight);}.fli.active{background:var(--green-light);}
+  .fli-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .fli-icon svg{width:14px;height:14px;}
+  .fli-info{flex:1;min-width:0;}
+  .fli-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .fli.active .fli-name{color:var(--green-dark);}
+  .fli-desc{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
+  /* CONTENT PANEL */
+  .content-panel{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+  .cp-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;}
+  .cp-header h2{font-size:16px;font-weight:700;flex:1;min-width:160px;}
+  /* TABS */
+  .tabs{display:flex;gap:2px;background:var(--grey-xlight);border-radius:var(--radius-sm);padding:3px;}
+  .tab-btn{padding:.3rem .85rem;border-radius:5px;font-size:12.5px;font-weight:400;cursor:pointer;border:none;background:none;color:var(--text-muted);font-family:inherit;transition:all .12s;}
+  .tab-btn.active{background:var(--white);color:var(--text);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.1);}
+  .resp-count{background:var(--green-light);color:var(--green-dark);border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700;}
+  /* FORM RENDERER */
+  .fv-wrap{padding:1.5rem;max-width:660px;}
+  .fv-title{font-size:19px;font-weight:700;margin-bottom:4px;}
+  .fv-desc{font-size:13px;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.5;}
+  .fv-section{font-size:11px;font-weight:700;color:var(--green-dark);text-transform:uppercase;letter-spacing:.07em;margin:1.5rem 0 .75rem;padding-bottom:6px;border-bottom:1.5px solid var(--green-light);}
+  .fv-group{margin-bottom:1.1rem;}
+  .fv-label{display:block;font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;}
+  .fv-label .req{color:#c0392b;margin-left:3px;}
+  .fv-hint{font-size:11.5px;color:var(--text-muted);margin-bottom:6px;font-style:italic;}
+  .fv-input,.fv-select{width:100%;padding:.55rem .8rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;font-family:inherit;color:var(--text);background:var(--white);outline:none;transition:border-color .12s;}
+  .fv-input:focus,.fv-select:focus{border-color:var(--green);}
+  .fv-select{cursor:pointer;}
+  .fv-textarea{width:100%;padding:.55rem .8rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;font-family:inherit;color:var(--text);background:var(--white);outline:none;transition:border-color .12s;resize:vertical;min-height:88px;}
+  .fv-textarea:focus{border-color:var(--green);}
+  .fv-textarea.tall{min-height:120px;}
+  .fv-radio-group{display:flex;gap:8px;flex-wrap:wrap;}
+  .fv-option-label{display:flex;align-items:center;gap:7px;font-size:13.5px;cursor:pointer;padding:.45rem .85rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);transition:border-color .12s;}
+  .fv-option-label:hover{border-color:var(--green);background:var(--green-xlight);}
+  .fv-option-label input{accent-color:var(--green);width:15px;height:15px;flex-shrink:0;}
+  .fv-inline{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  .fv-upload-area{border:1.5px dashed var(--border);border-radius:var(--radius-sm);padding:1rem;text-align:center;cursor:pointer;transition:all .12s;background:var(--grey-xlight);}
+  .fv-upload-area:hover{border-color:var(--green);background:var(--green-xlight);}
+  .fv-upload-area input{display:none;}
+  .fv-upload-area p{font-size:12.5px;color:var(--text-muted);margin-top:4px;}
+  .fv-upload-name{font-size:12.5px;color:var(--green-dark);font-weight:700;margin-top:6px;}
+  .fv-conditional{padding:1rem;background:var(--grey-xlight);border-radius:var(--radius-sm);border-left:3px solid var(--green);margin-top:6px;}
+  .form-submit-row{margin-top:1.75rem;padding-top:1.25rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:1rem;}
+  /* RESPONSES */
+  .responses-view{padding:1.25rem;}
+  .filter-row{display:flex;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap;}
+  .search-input{flex:1;min-width:180px;padding:.45rem .8rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;color:var(--text);background:var(--white);outline:none;}
+  .search-input:focus{border-color:var(--green);}
+  .filter-select{padding:.45rem .75rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;color:var(--text-muted);background:var(--white);cursor:pointer;outline:none;}
+  .data-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .data-table th{text-align:left;padding:.6rem .85rem;font-weight:700;font-size:11.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1.5px solid var(--border);background:var(--grey-xlight);}
+  .data-table td{padding:.7rem .85rem;border-bottom:1px solid var(--grey-xlight);color:var(--text);vertical-align:middle;}
+  .data-table tr:hover td{background:var(--green-xlight);}
+  .data-table tr:last-child td{border-bottom:none;}
+  .sdot{display:inline-flex;align-items:center;gap:5px;font-size:12px;}
+  .sdot::before{content:'';width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .sdot.new::before{background:var(--green);}
+  .sdot.reviewed::before{background:#f59e0b;}
+  .sdot.approved::before{background:#2563eb;}
+  .sdot.declined::before{background:#dc2626;}
+  .empty-state{text-align:center;padding:3rem 1.5rem;color:var(--text-muted);}
+  .empty-state svg{width:40px;height:40px;margin-bottom:.75rem;opacity:.3;}
+  /* SHARE */
+  .share-view{padding:1.25rem;}
+  .form-group{margin-bottom:1rem;}
+  .form-label{display:block;font-size:12.5px;font-weight:700;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;}
+  .form-input{width:100%;padding:.55rem .8rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;font-family:inherit;color:var(--text);background:var(--white);outline:none;}
+  .form-select-full{width:100%;padding:.55rem .8rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;font-family:inherit;color:var(--text);background:var(--white);outline:none;cursor:pointer;}
+  /* SP */
+  .sp-layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+  .sp-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+  .sp-card-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem;}
+  .sp-card-header h2{font-size:15px;font-weight:700;flex:1;}
+  .sp-card-body{padding:1.25rem;}
+  .tpl-option{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.85rem 1rem;margin-bottom:8px;cursor:pointer;transition:all .12s;display:flex;align-items:flex-start;gap:10px;}
+  .tpl-option:hover{border-color:var(--green);background:var(--green-xlight);}
+  .tpl-option.selected{border-color:var(--green);background:var(--green-light);}
+  .tpl-radio{width:16px;height:16px;border:2px solid var(--border);border-radius:50%;flex-shrink:0;margin-top:1px;position:relative;transition:border-color .12s;}
+  .tpl-option.selected .tpl-radio{border-color:var(--green);}
+  .tpl-option.selected .tpl-radio::after{content:'';position:absolute;top:2px;left:2px;width:8px;height:8px;border-radius:50%;background:var(--green);}
+  .tpl-info h3{font-size:13.5px;font-weight:700;color:var(--text);}
+  .tpl-info p{font-size:12px;color:var(--text-muted);margin-top:2px;}
+  .tpl-folders{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+  .folder-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:var(--grey-xlight);border-radius:4px;font-size:11px;color:var(--text-muted);}
+  .folder-chip svg{width:11px;height:11px;}
+  .folder-tree{font-size:12.5px;color:var(--text-muted);}
+  .fti{display:flex;align-items:center;gap:5px;padding:3px 0;}
+  .fti svg{width:13px;height:13px;flex-shrink:0;}
+  .fti-child{padding-left:18px;}.fti-child .fti{color:var(--text);}
+  .recent-item{display:flex;align-items:center;gap:10px;padding:.65rem 0;border-bottom:1px solid var(--grey-xlight);font-size:13px;}
+  .recent-item:last-child{border-bottom:none;}
+  .recent-item svg{width:16px;height:16px;color:var(--green-dark);flex-shrink:0;}
+  .ri-name{flex:1;font-weight:700;}
+  .ri-meta{font-size:11.5px;color:var(--text-muted);}
+  /* ACTIVITY */
+  .act-feed{padding:0 1.25rem 1.25rem;}
+  .act-item{display:flex;gap:10px;padding:.7rem 0;border-bottom:1px solid var(--grey-xlight);font-size:13px;}
+  .act-item:last-child{border-bottom:none;}
+  .act-dot{width:8px;height:8px;border-radius:50%;background:var(--green);margin-top:4px;flex-shrink:0;}
+  .act-dot.grey{background:var(--grey);}
+  .act-text{flex:1;}.act-time{color:var(--text-muted);font-size:11.5px;}
+  /* MODAL */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s;}
+  .modal-backdrop.open{opacity:1;pointer-events:all;}
+  .modal{background:var(--white);border-radius:var(--radius);width:100%;max-width:520px;box-shadow:0 12px 40px rgba(0,0,0,.18);transform:translateY(20px);transition:transform .2s;}
+  .modal-backdrop.open .modal{transform:translateY(0);}
+  .modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem;}
+  .modal-header h2{font-size:16px;font-weight:700;flex:1;}
+  .modal-body{padding:1.25rem 1.5rem;max-height:60vh;overflow-y:auto;}
+  .modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.75rem;justify-content:flex-end;align-items:center;}
+  /* TOAST */
+  .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--text);color:white;padding:.75rem 1.25rem;border-radius:var(--radius-sm);font-size:13.5px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:all .25s;z-index:999;max-width:320px;}
+  .toast.show{transform:translateY(0);opacity:1;}
+  .toast.success{background:var(--green-dark);}
+  .toast svg{width:16px;height:16px;flex-shrink:0;}
+
+
+
+  /* LOGIN SCREEN */
+  .login-screen{position:fixed;inset:0;background:var(--grey-xlight);display:flex;align-items:center;justify-content:center;z-index:500;flex-direction:column;gap:0;}
+  .login-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:2.5rem 2.5rem 2rem;max-width:400px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.08);text-align:center;}
+  .login-logo{width:52px;height:52px;background:var(--green);border-radius:14px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:24px;margin:0 auto 1.25rem;}
+  .login-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:6px;}
+  .login-subtitle{font-size:13.5px;color:var(--text-muted);margin-bottom:2rem;line-height:1.5;}
+  .btn-microsoft{background:#2f2f2f;color:white;width:100%;justify-content:center;padding:.75rem 1.5rem;font-size:14px;border-radius:var(--radius-sm);gap:10px;}
+  .btn-microsoft:hover{background:#1a1a1a;}
+  .btn-microsoft svg{width:18px;height:18px;flex-shrink:0;}
+  .login-error{color:#dc2626;font-size:12.5px;margin-top:1rem;display:none;}
+  .login-loading{color:var(--text-muted);font-size:13px;margin-top:1rem;display:none;}
+  .user-bar{background:var(--green-xlight);border-bottom:1px solid var(--green-light);padding:.5rem 2rem;display:flex;align-items:center;gap:.75rem;font-size:13px;}
+  .user-bar-name{font-weight:700;color:var(--text);flex:1;}
+  .user-bar-role{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:10px;}
+  .user-bar-role.admin{background:var(--green-light);color:var(--green-dark);}
+  .user-bar-role.benchwarmer{background:#e3f0ff;color:#1a5fbd;}
+  /* ROLE TOGGLE */
+  .role-toggle{position:fixed;bottom:1.5rem;left:1.5rem;background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:.6rem .85rem;display:flex;align-items:center;gap:.6rem;font-size:12.5px;box-shadow:0 2px 12px rgba(0,0,0,.1);z-index:90;cursor:pointer;transition:border-color .15s;}
+  .role-toggle:hover{border-color:var(--green);}
+  .role-toggle-label{font-weight:700;color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;}
+  .role-pill{padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;transition:all .15s;}
+  .role-pill.admin{background:var(--green-light);color:var(--green-dark);}
+  .role-pill.benchwarm{background:#e3f0ff;color:#1a5fbd;}
+  .role-toggle-hint{font-size:10.5px;color:var(--text-muted);margin-top:1px;}
+  /* MODULE VISIBILITY */
+  .admin-only{transition:opacity .2s;}
+  .benchwarm-only{transition:opacity .2s;}
+  /* LISTS MODULE */
+  .lists-layout{display:grid;grid-template-columns:220px 1fr;gap:1.5rem;align-items:start;}
+  .list-sidebar{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+  .list-sidebar-header{padding:.85rem 1rem;border-bottom:1px solid var(--border);font-weight:700;font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;}
+  .list-nav-item{padding:.85rem 1rem;border-bottom:1px solid var(--grey-xlight);cursor:pointer;transition:background .12s;display:flex;align-items:center;gap:10px;}
+  .list-nav-item:hover{background:var(--green-xlight);}
+  .list-nav-item.active{background:var(--green-light);}
+  .list-nav-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .list-nav-icon svg{width:14px;height:14px;}
+  .list-nav-name{font-size:13px;font-weight:700;color:var(--text);}
+  .list-nav-item.active .list-nav-name{color:var(--green-dark);}
+  .list-nav-count{font-size:11px;color:var(--text-muted);margin-top:1px;}
+  .list-panel{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+  .list-panel-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;}
+  .list-panel-header h2{font-size:16px;font-weight:700;flex:1;}
+  .list-panel-body{padding:1.25rem;}
+  .list-toolbar{display:flex;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center;}
+  .list-toolbar-right{margin-left:auto;display:flex;gap:.75rem;}
+  /* INLINE EDIT TABLE */
+  .ie-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .ie-table th{text-align:left;padding:.6rem .85rem;font-weight:700;font-size:11.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1.5px solid var(--border);background:var(--grey-xlight);white-space:nowrap;}
+  .ie-table td{padding:.65rem .85rem;border-bottom:1px solid var(--grey-xlight);vertical-align:middle;}
+  .ie-table tr:hover td{background:var(--green-xlight);}
+  .ie-table tr:last-child td{border-bottom:none;}
+  .ie-table tr.editing td{background:#fffbf0;border-bottom:1px solid #f59e0b;}
+  .ie-cell-view{font-size:13px;color:var(--text);cursor:pointer;}
+  .ie-cell-view:hover{color:var(--green-dark);}
+  .ie-cell-input{width:100%;padding:.3rem .5rem;border:1.5px solid var(--green);border-radius:4px;font-size:13px;font-family:inherit;background:var(--white);outline:none;}
+  .ie-cell-select{width:100%;padding:.3rem .5rem;border:1.5px solid var(--green);border-radius:4px;font-size:13px;font-family:inherit;background:var(--white);outline:none;cursor:pointer;}
+  .ie-row-actions{display:flex;gap:6px;white-space:nowrap;}
+  /* PROJECT CODE BADGE */
+  .proj-code{display:inline-block;background:var(--green-light);color:var(--green-dark);border-radius:4px;padding:2px 8px;font-size:12px;font-weight:700;font-family:monospace;}
+  /* STATUS PILLS */
+  .pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;}
+  .pill-pending{background:#fff3e0;color:#e65100;}
+  .pill-active{background:var(--green-light);color:var(--green-dark);}
+  .pill-completed{background:#e3f0ff;color:#1a5fbd;}
+  .pill-cancelled{background:var(--grey-light);color:var(--grey);}
+  .pill-yes{background:var(--green-light);color:var(--green-dark);}
+  .pill-no{background:var(--grey-light);color:var(--grey);}
+
+
+  /* AVAILABILITY MODULE */
+  .avail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:1.5rem;}
+  .avail-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:1.25rem;transition:all .15s;position:relative;}
+  .avail-card:hover{border-color:var(--green);box-shadow:0 2px 12px rgba(0,0,0,.08);}
+  .avail-card-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px;}
+  .avail-card-role{font-size:12px;color:var(--text-muted);margin-bottom:.85rem;}
+  .avail-status-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap;}
+  .avail-btn{flex:1;min-width:0;padding:.4rem .5rem;border-radius:var(--radius-sm);font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--white);font-family:inherit;transition:all .12s;text-align:center;}
+  .avail-btn:hover{border-color:var(--green);}
+  .avail-btn.selected-available{background:#dcfce7;border-color:#16a34a;color:#16a34a;}
+  .avail-btn.selected-unavailable{background:#fee2e2;border-color:#dc2626;color:#dc2626;}
+  .avail-btn.selected-date{background:#e3f0ff;border-color:#1a5fbd;color:#1a5fbd;}
+  .avail-date-input{width:100%;padding:.4rem .65rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12.5px;font-family:inherit;color:var(--text);background:var(--white);outline:none;margin-top:.5rem;}
+  .avail-date-input:focus{border-color:var(--green);}
+  .avail-save-btn{width:100%;margin-top:.75rem;padding:.4rem;border-radius:var(--radius-sm);font-size:12.5px;font-weight:700;cursor:pointer;border:none;background:var(--green);color:white;font-family:inherit;transition:background .12s;}
+  .avail-save-btn:hover{background:var(--green-dark);}
+  .avail-last-updated{font-size:11px;color:var(--text-muted);margin-top:.5rem;text-align:right;}
+  .avail-status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;}
+  .avail-status-badge.available{background:#dcfce7;color:#16a34a;}
+  .avail-status-badge.unavailable{background:#fee2e2;color:#dc2626;}
+  .avail-status-badge.date{background:#e3f0ff;color:#1a5fbd;}
+  .avail-status-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
+  /* Quick update panel */
+  .avail-quick-panel{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:2rem;max-width:480px;margin:0 auto;}
+  .avail-quick-name{font-size:22px;font-weight:700;margin-bottom:4px;}
+  .avail-quick-sub{font-size:13px;color:var(--text-muted);margin-bottom:1.5rem;}
+  .avail-big-btns{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem;}
+  .avail-big-btn{padding:1.25rem 1rem;border-radius:var(--radius);font-size:14px;font-weight:700;cursor:pointer;border:2px solid var(--border);background:var(--white);font-family:inherit;transition:all .15s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.5rem;}
+  .avail-big-btn svg{width:28px;height:28px;}
+  .avail-big-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.1);}
+  .avail-big-btn.sel-available{background:#dcfce7;border-color:#16a34a;color:#16a34a;}
+  .avail-big-btn.sel-unavailable{background:#fee2e2;border-color:#dc2626;color:#dc2626;}
+  .avail-big-btn.sel-date{background:#e3f0ff;border-color:#1a5fbd;color:#1a5fbd;}
+  .avail-date-row{background:var(--grey-xlight);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1rem;display:none;}
+  .avail-date-row.show{display:block;}
+  /* CV / PLAYER PROFILE MODULE */
+  .cv-layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;}
+  .cv-upload-panel,.cv-output-panel{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+  .cv-panel-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem;}
+  .cv-panel-header h2{font-size:15px;font-weight:700;flex:1;}
+  .cv-panel-body{padding:1.5rem;}
+  .cv-drop-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:all .15s;background:var(--grey-xlight);}
+  .cv-drop-zone:hover,.cv-drop-zone.dragover{border-color:var(--green);background:var(--green-xlight);}
+  .cv-drop-zone svg{width:36px;height:36px;color:var(--text-muted);margin-bottom:.75rem;}
+  .cv-drop-zone p{font-size:13px;color:var(--text-muted);margin-top:4px;}
+  .cv-drop-zone strong{font-size:14px;color:var(--text);}
+  .cv-file-selected{display:flex;align-items:center;gap:10px;padding:.85rem 1rem;background:var(--green-xlight);border:1.5px solid var(--green-light);border-radius:var(--radius-sm);margin-top:1rem;}
+  .cv-file-selected svg{width:18px;height:18px;color:var(--green-dark);flex-shrink:0;}
+  .cv-file-name{flex:1;font-size:13px;font-weight:700;color:var(--green-dark);}
+  .cv-file-size{font-size:11.5px;color:var(--text-muted);}
+  .cv-processing{text-align:center;padding:2rem;}
+  .cv-processing-spinner{width:36px;height:36px;border:3px solid var(--green-light);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .cv-processing p{font-size:13px;color:var(--text-muted);}
+  /* BENCH PLAYER PROFILE OUTPUT */
+  .bpp{font-family:'Aptos','Calibri Light',Calibri,sans-serif;font-size:13px;color:#333;line-height:1.5;}
+  .bpp-header{margin-bottom:1.5rem;}
+  .bpp-title{font-size:26px;font-weight:900;color:#333;margin-bottom:2px;}
+  .bpp-title span{color:var(--green);}
+  .bpp-name{font-size:22px;font-weight:700;color:#333;margin:1rem 0 2px;}
+  .bpp-role{font-size:14px;font-weight:700;color:var(--green);margin-bottom:.75rem;}
+  .bpp-contact{display:flex;gap:1.5rem;font-size:12.5px;color:var(--text-muted);margin-bottom:1rem;flex-wrap:wrap;}
+  .bpp-contact span{display:flex;align-items:center;gap:5px;}
+  .bpp-contact svg{width:13px;height:13px;}
+  .bpp-summary{font-size:13px;color:#444;line-height:1.6;margin-bottom:1.5rem;}
+  .bpp-section-title{font-size:14px;font-weight:700;color:#333;margin-bottom:.75rem;padding-bottom:4px;border-bottom:1.5px solid var(--green-light);}
+  .bpp-expertise-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid #ddd;margin-bottom:1.5rem;}
+  .bpp-expertise-col-header{background:#f5f5f5;padding:.5rem .75rem;font-size:12px;font-weight:700;color:#333;border-right:1px solid #ddd;border-bottom:1px solid #ddd;}
+  .bpp-expertise-col-header:last-child{border-right:none;}
+  .bpp-expertise-cell{padding:.5rem .75rem;font-size:12px;color:#444;border-right:1px solid #ddd;border-bottom:1px solid #ddd;vertical-align:top;}
+  .bpp-expertise-cell:last-child{border-right:none;}
+  .bpp-expertise-row:last-child .bpp-expertise-cell{border-bottom:none;}
+  .bpp-exp-table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;}
+  .bpp-exp-table td{padding:.5rem 0;border-bottom:1px solid #eee;vertical-align:top;}
+  .bpp-exp-table tr:last-child td{border-bottom:none;}
+  .bpp-exp-org{font-weight:700;font-size:13px;color:#333;width:38%;}
+  .bpp-exp-role{font-size:13px;color:#444;width:37%;}
+  .bpp-exp-dates{font-size:12px;color:var(--text-muted);text-align:right;width:25%;}
+  .bpp-highlights-table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;border:1px solid #ddd;}
+  .bpp-highlights-table th{background:#f5f5f5;padding:.5rem .75rem;font-size:12px;font-weight:700;color:#333;text-align:left;border-bottom:1px solid #ddd;border-right:1px solid #ddd;}
+  .bpp-highlights-table th:last-child{border-right:none;}
+  .bpp-highlights-table td{padding:.5rem .75rem;font-size:12px;color:#444;border-bottom:1px solid #eee;border-right:1px solid #ddd;vertical-align:top;}
+  .bpp-highlights-table td:last-child{border-right:none;}
+  .bpp-highlights-table tr:last-child td{border-bottom:none;}
+  .bpp-highlights-table .bpp-hl-role{font-weight:700;color:#333;width:30%;}
+  .bpp-two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
+  .bpp-list{list-style:none;padding:0;}
+  .bpp-list li{font-size:12.5px;color:#444;padding:3px 0;display:flex;align-items:flex-start;gap:6px;}
+  .bpp-list li::before{content:"▪";color:var(--green);flex-shrink:0;margin-top:1px;}
+  .bpp-footer{margin-top:1.5rem;padding-top:.75rem;border-top:1px solid #ddd;font-size:11px;color:var(--text-muted);text-align:center;}
+  .bpp-watermark{color:#e0e0e0;font-size:10px;text-align:center;margin-top:4px;}
+  .cv-history-item{display:flex;align-items:center;gap:10px;padding:.65rem 0;border-bottom:1px solid var(--grey-xlight);font-size:13px;}
+  .cv-history-item:last-child{border-bottom:none;}
+  .cv-history-name{flex:1;font-weight:700;color:var(--text);}
+  .cv-history-date{font-size:11.5px;color:var(--text-muted);}
+  @media(max-width:768px){.panel-layout{grid-template-columns:1fr;}.sp-layout{grid-template-columns:1fr;}nav{padding:0 1rem;}.nav-link span{display:none;}.fv-inline{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">B</div>
+    <div class="login-title">The Bench Operations Hub</div>
+    <div class="login-subtitle">Sign in with your The Bench Microsoft account to continue.</div>
+    <button class="btn btn-microsoft" onclick="signIn()">
+      <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+      Sign in with Microsoft
+    </button>
+    <div class="login-error" id="login-error">Sign-in failed. Please try again.</div>
+    <div class="login-loading" id="login-loading">Signing you in…</div>
+    <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border);">
+      <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">Local Testing Bypass</div>
+      <select id="bypass-role" style="width:100%;padding:.55rem .8rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;font-family:inherit;margin-bottom:.65rem;background:var(--white);outline:none;cursor:pointer;">
+        <option value="admin-aidan">Aidan (Admin)</option>
+        <option value="admin-anthony">Anthony (Admin)</option>
+        <option value="admin-charlie">Charlie (Admin)</option>
+        <option value="benchwarmer">Bench Warmer</option>
+      </select>
+      <button onclick="bypassLogin()" style="width:100%;justify-content:center;padding:.55rem 1rem;border-radius:var(--radius-sm);font-size:13.5px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--white);font-family:inherit;">
+        Enter as selected user
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- USER BAR (shown when logged in) -->
+<div id="user-bar" class="user-bar" style="display:none;">
+  <div class="nav-avatar" id="user-initials" style="width:26px;height:26px;font-size:11px;">?</div>
+  <div class="user-bar-name" id="user-name">—</div>
+  <div class="user-bar-role" id="user-role-badge">—</div>
+  <button class="btn btn-ghost btn-sm" onclick="signOut()" style="font-size:12px;">Sign out</button>
+</div>
+
+<nav>
+  <div class="nav-logo" onclick="showView('dashboard')">
+    <div class="nav-logo-mark">B</div>
+    The Bench
+  </div>
+  <div class="nav-links">
+    <button class="nav-link active" id="nav-dashboard" onclick="showView('dashboard')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>
+      <span>Dashboard</span>
+    </button>
+    <button class="nav-link" id="nav-forms" onclick="showView('forms')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="14" height="14" rx="2"/><line x1="7" y1="7" x2="13" y2="7"/><line x1="7" y1="10" x2="13" y2="10"/><line x1="7" y1="13" x2="10" y2="13"/></svg>
+      <span>Forms</span>
+    </button>
+    <button class="nav-link" id="nav-lists" onclick="showView('lists')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="16" height="14" rx="2"/><line x1="2" y1="8" x2="18" y2="8"/><line x1="6" y1="12" x2="14" y2="12"/><line x1="6" y1="15" x2="11" y2="15"/></svg>
+      <span>Lists</span>
+    </button>
+    <button class="nav-link" id="nav-availability" onclick="showView('availability')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="7"/><polyline points="10 6 10 10 13 12"/></svg>
+      <span>Availability</span>
+    </button>
+    <button class="nav-link" id="nav-cv" onclick="showView('cv')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="2" width="12" height="16" rx="2"/><line x1="7" y1="6" x2="13" y2="6"/><line x1="7" y1="9" x2="13" y2="9"/><line x1="7" y1="12" x2="10" y2="12"/></svg>
+      <span>Player Profiles</span>
+    </button>
+    <button class="nav-link" id="nav-sharepoint" onclick="showView('sharepoint')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l7-4 7 4v6l-7 4-7-4V9z"/></svg>
+      <span>SharePoint</span>
+    </button>
+  </div>
+  <div class="nav-user"><div class="nav-avatar">TB</div></div>
+</nav>
+
+<main>
+
+<!-- DASHBOARD -->
+<div class="view active" id="view-dashboard">
+  <div class="db-header">
+    <h1>Operations Hub</h1>
+    <p>Welcome back. Here's an overview of your active tools.</p>
+  </div>
+  <div class="module-grid">
+    <div class="module-card" onclick="showView('forms')">
+      <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg></div>
+      <h2>Forms & Responses</h2>
+      <p>Submit and manage New Project approvals, Project Highlights case studies, and Bench Chambers RSVPs — all in one place.</p>
+      <div class="module-meta"><span class="badge badge-green">3 forms</span><span class="badge badge-grey" id="dash-resp-count">0 responses</span></div>
+      <div class="module-cta">Open Forms <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg></div>
+    </div>
+    <div class="module-card" onclick="showView('lists')">
+      <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="7" y1="14" x2="17" y2="14"/><line x1="7" y1="17" x2="13" y2="17"/></svg></div>
+      <h2>SharePoint Lists</h2>
+      <p>View and edit the Project Register and Bench Chambers Email List directly — no need to open SharePoint.</p>
+      <div class="module-meta"><span class="badge badge-green">2 lists</span><span class="badge badge-grey" id="dash-list-count">0 items</span></div>
+      <div class="module-cta">Open Lists <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg></div>
+    </div>
+    <div class="module-card" onclick="showView('availability')">
+      <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div>
+      <h2>Bench Warmer Availability</h2>
+      <p>Bench Warmers can quickly set themselves as available, unavailable, or provide a date they're next free.</p>
+      <div class="module-meta"><span class="badge badge-green" id="dash-avail-available">0 available</span><span class="badge badge-grey" id="dash-avail-unavailable">0 unavailable</span></div>
+      <div class="module-cta">Update Availability <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg></div>
+    </div>
+    <div class="module-card" onclick="showView('cv')">
+      <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="12" y2="15"/></svg></div>
+      <h2>Bench Player Profiles</h2>
+      <p>Upload a CV and automatically reformat it into a branded Bench Player Profile — ready to download and share.</p>
+      <div class="module-meta"><span class="badge badge-green">AI-powered</span><span class="badge badge-grey" id="dash-cv-count">0 profiles generated</span></div>
+      <div class="module-cta">Open Profile Generator <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg></div>
+    </div>
+    <div class="module-card" onclick="showView('sharepoint')">
+      <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+      <h2>SharePoint Folders</h2>
+      <p>Automatically create standardised folder structures from templates for every new project or tender.</p>
+      <div class="module-meta"><span class="badge badge-green">4 templates</span><span class="badge badge-grey">7 folders created</span></div>
+      <div class="module-cta">Open Folder Tools <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg></div>
+    </div>
+  </div>
+  <div style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;max-width:640px;">
+    <div style="padding:.85rem 1.25rem;border-bottom:1px solid var(--border);font-weight:700;font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;">Recent Activity</div>
+    <div class="act-feed" id="activity-feed">
+      <div class="act-item"><div class="act-dot grey"></div><div class="act-text">Hub ready — no submissions yet</div><div class="act-time">Now</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- FORMS -->
+<div class="view" id="view-forms">
+  <div class="section-header">
+    <button class="btn btn-ghost btn-sm" onclick="showView('dashboard')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polyline points="10 4 6 8 10 12"/></svg> Back</button>
+    <h1>Forms & Responses</h1>
+  </div>
+  <div class="panel-layout">
+    <!-- Sidebar -->
+    <div class="sidebar-panel">
+      <div class="spanel-header">Forms <span class="badge badge-green" style="text-transform:none;letter-spacing:0;">3</span></div>
+      <div class="fli active" id="fl-new-project" onclick="selectForm('new-project')">
+        <div class="fli-icon" style="background:#fff3e0;"><svg viewBox="0 0 16 16" fill="none" stroke="#e65100" stroke-width="1.8"><rect x="2" y="2" width="12" height="12" rx="2"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="5" y1="11" x2="8" y2="11"/></svg></div>
+        <div class="fli-info"><div class="fli-name">New Project Form</div><div class="fli-desc">Project approval request</div></div>
+      </div>
+      <div class="fli" id="fl-project-highlights" onclick="selectForm('project-highlights')">
+        <div class="fli-icon" style="background:var(--green-light);"><svg viewBox="0 0 16 16" fill="none" stroke="var(--green-dark)" stroke-width="1.8"><path d="M8 2l1.5 3 3.5.5-2.5 2.5.6 3.5L8 10l-3.1 1.5.6-3.5L3 5.5l3.5-.5z"/></svg></div>
+        <div class="fli-info"><div class="fli-name">Project Highlights Form</div><div class="fli-desc">Completed project case study</div></div>
+      </div>
+      <div class="fli" id="fl-rsvp" onclick="selectForm('rsvp')">
+        <div class="fli-icon" style="background:#e3f0ff;"><svg viewBox="0 0 16 16" fill="none" stroke="#1a5fbd" stroke-width="1.8"><rect x="2" y="3" width="12" height="11" rx="1.5"/><line x1="5" y1="3" x2="5" y2="1"/><line x1="11" y1="3" x2="11" y2="1"/><line x1="2" y1="7" x2="14" y2="7"/></svg></div>
+        <div class="fli-info"><div class="fli-name">Bench Chambers RSVP</div><div class="fli-desc">Weekly event registration</div></div>
+      </div>
+    </div>
+
+    <!-- Content panel -->
+    <div class="content-panel">
+      <div class="cp-header">
+        <h2 id="active-form-title">New Project Form</h2>
+        <div class="tabs">
+          <button class="tab-btn active" id="tb-form" onclick="switchTab('form')">Form</button>
+          <button class="tab-btn" id="tb-responses" onclick="switchTab('responses')">Responses <span class="resp-count" id="resp-badge">0</span></button>
+          <button class="tab-btn" id="tb-share" onclick="switchTab('share')">Share</button>
+        </div>
+      </div>
+
+      <div id="tab-form"></div>
+
+      <div id="tab-responses" style="display:none;">
+        <div class="responses-view">
+          <div class="filter-row">
+            <input class="search-input" type="search" placeholder="Search responses…" id="resp-search" oninput="renderResponses()" />
+            <select class="filter-select" id="resp-filter" onchange="renderResponses()">
+              <option value="">All status</option>
+              <option value="New">New</option>
+              <option value="Reviewed">Reviewed</option>
+              <option value="Approved">Approved</option>
+              <option value="Declined">Declined</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" onclick="exportCSV()">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M13 10v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2"/><polyline points="5 7 8 10 11 7"/><line x1="8" y1="2" x2="8" y2="10"/></svg>
+              Export CSV
+            </button>
+          </div>
+          <div style="overflow-x:auto;" id="resp-table-wrap"></div>
+        </div>
+      </div>
+
+      <div id="tab-share" style="display:none;">
+        <div class="share-view">
+          <div class="form-group">
+            <label class="form-label">Shareable Link</label>
+            <div style="display:flex;gap:8px;">
+              <input class="form-input" id="share-url" readonly style="color:var(--text-muted);flex:1;" />
+              <button class="btn btn-secondary" onclick="copyLink()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:14px;height:14px;"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M3 11V3a1 1 0 011-1h8"/></svg> Copy</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Embed in SharePoint</label>
+            <div style="background:var(--grey-xlight);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.75rem;font-size:12px;font-family:monospace;color:var(--text-muted);word-break:break-all;" id="embed-code"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <div id="form-status-toggle" style="width:40px;height:22px;background:var(--green);border-radius:11px;position:relative;cursor:pointer;" onclick="toggleFormStatus()">
+                <div style="width:18px;height:18px;background:white;border-radius:50%;position:absolute;top:2px;right:2px;transition:right .15s;" id="status-knob"></div>
+              </div>
+              <span style="font-size:13px;" id="status-label">Form is <strong>Live</strong> — accepting responses</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- LISTS -->
+<div class="view" id="view-lists">
+  <div class="section-header">
+    <button class="btn btn-ghost btn-sm" onclick="showView('dashboard')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polyline points="10 4 6 8 10 12"/></svg> Back</button>
+    <h1>SharePoint Lists</h1>
+  </div>
+  <div class="lists-layout">
+    <!-- List selector sidebar -->
+    <div class="list-sidebar">
+      <div class="list-sidebar-header">Lists</div>
+      <div class="list-nav-item active" id="ln-project-register" onclick="selectList('project-register')">
+        <div class="list-nav-icon" style="background:#fff3e0;"><svg viewBox="0 0 16 16" fill="none" stroke="#e65100" stroke-width="1.8"><rect x="2" y="2" width="12" height="12" rx="2"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="5" y1="11" x2="8" y2="11"/></svg></div>
+        <div><div class="list-nav-name">Project Register</div><div class="list-nav-count" id="lc-project-register">0 items</div></div>
+      </div>
+      <div class="list-nav-item" id="ln-availability" onclick="selectList('availability')">
+        <div class="list-nav-icon" style="background:#f0fdf4;"><svg viewBox="0 0 16 16" fill="none" stroke="#16a34a" stroke-width="1.8"><circle cx="8" cy="8" r="6"/><polyline points="8 5 8 8 10 9.5"/></svg></div>
+        <div><div class="list-nav-name">Bench Warmer Availability</div><div class="list-nav-count" id="lc-availability">0 items</div></div>
+      </div>
+      <div class="list-nav-item" id="ln-email-list" onclick="selectList('email-list')">
+        <div class="list-nav-icon" style="background:#e3f0ff;"><svg viewBox="0 0 16 16" fill="none" stroke="#1a5fbd" stroke-width="1.8"><rect x="2" y="4" width="12" height="9" rx="1.5"/><polyline points="2 6 8 10 14 6"/></svg></div>
+        <div><div class="list-nav-name">Bench Chambers Email List</div><div class="list-nav-count" id="lc-email-list">0 items</div></div>
+      </div>
+    </div>
+
+    <!-- List content panel -->
+    <div class="list-panel">
+      <div class="list-panel-header">
+        <h2 id="active-list-title">Project Register</h2>
+        <div id="list-header-actions"></div>
+      </div>
+      <div class="list-panel-body">
+        <div class="list-toolbar">
+          <input class="search-input" type="search" id="list-search" placeholder="Search…" oninput="renderList()" style="max-width:240px;" />
+          <div id="list-filter-slot"></div>
+          <div class="list-toolbar-right">
+            <button class="btn btn-secondary btn-sm" onclick="exportListCSV()">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M13 10v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2"/><polyline points="5 7 8 10 11 7"/><line x1="8" y1="2" x2="8" y2="10"/></svg>
+              Export CSV
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="openAddItemModal()" id="add-item-btn">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" style="width:13px;height:13px;"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>
+              Add Item
+            </button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;" id="list-table-wrap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- AVAILABILITY -->
+<div class="view" id="view-availability">
+  <div class="section-header">
+    <button class="btn btn-ghost btn-sm" onclick="showView('dashboard')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polyline points="10 4 6 8 10 12"/></svg> Back</button>
+    <h1>Bench Warmer Availability</h1>
+    <button class="btn btn-secondary" onclick="switchAvailView('admin')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:14px;height:14px;"><rect x="2" y="2" width="12" height="12" rx="2"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="5" y1="11" x2="8" y2="11"/></svg>
+      <span id="avail-view-toggle-label">Admin View</span>
+    </button>
+    <button class="btn btn-primary" onclick="openAddBenchWarmerModal()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" style="width:13px;height:13px;"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>
+      Add Bench Warmer
+    </button>
+  </div>
+
+  <!-- QUICK UPDATE VIEW (default — for Bench Warmers) -->
+  <div id="avail-quick-view">
+    <div style="max-width:480px;margin:0 auto;">
+      <div style="margin-bottom:1.25rem;">
+        <label class="form-label">Select your name</label>
+        <select class="form-select-full" id="avail-warmer-select" onchange="loadWarmerQuickUpdate()">
+          <option value="">— Select your name —</option>
+        </select>
+      </div>
+      <div id="avail-quick-panel" style="display:none;" class="avail-quick-panel">
+        <div class="avail-quick-name" id="avail-quick-name"></div>
+        <div class="avail-quick-sub">Update your availability below</div>
+        <div class="avail-big-btns">
+          <button class="avail-big-btn" id="avail-btn-available" onclick="selectAvailStatus('available')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><polyline points="7 12 10 15 17 9"/></svg>
+            Available
+          </button>
+          <button class="avail-big-btn" id="avail-btn-unavailable" onclick="selectAvailStatus('unavailable')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
+            Unavailable
+          </button>
+        </div>
+        <div class="avail-date-row" id="avail-date-row">
+          <label class="form-label">Available from date</label>
+          <input type="date" class="avail-date-input" id="avail-date-picker" />
+          <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">Set a date if you know when you'll next be free.</div>
+        </div>
+        <button class="avail-save-btn" onclick="saveAvailability()">Save Availability</button>
+        <div class="avail-last-updated" id="avail-last-updated"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN VIEW -->
+  <div id="avail-admin-view" style="display:none;">
+    <div class="filter-row" style="margin-bottom:1.25rem;">
+      <input class="search-input" type="search" id="avail-search" placeholder="Search Bench Warmers…" oninput="renderAvailAdmin()" style="max-width:280px;" />
+      <select class="filter-select" id="avail-filter" onchange="renderAvailAdmin()">
+        <option value="">All status</option>
+        <option value="available">Available</option>
+        <option value="unavailable">Unavailable</option>
+        <option value="date">Available from date</option>
+        <option value="unknown">Not set</option>
+      </select>
+    </div>
+    <div class="avail-grid" id="avail-admin-grid"></div>
+  </div>
+</div>
+
+<!-- CV PROCESSOR -->
+<div class="view" id="view-cv">
+  <div class="section-header">
+    <button class="btn btn-ghost btn-sm" onclick="showView('dashboard')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polyline points="10 4 6 8 10 12"/></svg> Back</button>
+    <h1>Bench Player Profile Generator</h1>
+  </div>
+
+  <div class="cv-layout">
+    <!-- Upload panel -->
+    <div style="display:flex;flex-direction:column;gap:1.5rem;">
+      <div class="cv-upload-panel">
+        <div class="cv-panel-header">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px;color:var(--green-dark);"><path d="M4 16V4a2 2 0 012-2h8a2 2 0 012 2v12"/><polyline points="4 16 2 18 18 18 16 16"/></svg>
+          <h2>Upload CV</h2>
+        </div>
+        <div class="cv-panel-body">
+          <div class="cv-drop-zone" id="cv-drop-zone" onclick="document.getElementById('cv-file-input').click()" ondragover="cvDragOver(event)" ondragleave="cvDragLeave(event)" ondrop="cvDrop(event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <strong>Click to upload or drag & drop</strong>
+            <p>PDF or Word document (.pdf, .docx)</p>
+            <input type="file" id="cv-file-input" accept=".pdf,.doc,.docx" style="display:none;" onchange="cvFileSelected(this)" />
+          </div>
+          <div id="cv-file-info" style="display:none;" class="cv-file-selected">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h7l5 5v9a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1z"/><polyline points="11 4 11 9 16 9"/></svg>
+            <div>
+              <div class="cv-file-name" id="cv-file-name">filename.pdf</div>
+              <div class="cv-file-size" id="cv-file-size"></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="clearCV()" style="padding:4px;"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg></button>
+          </div>
+          <div style="margin-top:1.25rem;">
+            <button class="btn btn-primary" style="width:100%;justify-content:center;" id="cv-generate-btn" onclick="generateProfile()" disabled>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M13 6l-5-4-5 4v8a1 1 0 001 1h8a1 1 0 001-1V6z"/><polyline points="6 15 6 10 10 10 10 15"/></svg>
+              Generate Bench Player Profile
+            </button>
+          </div>
+          <div style="margin-top:.75rem;font-size:12px;color:var(--text-muted);text-align:center;">Powered by Claude AI — information is extracted directly from the CV, nothing is added or invented.</div>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="cv-upload-panel">
+        <div class="cv-panel-header">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px;color:var(--green-dark);"><circle cx="10" cy="10" r="7"/><polyline points="10 6 10 10 13 12"/></svg>
+          <h2>Recent Profiles</h2>
+        </div>
+        <div class="cv-panel-body" style="padding-top:.5rem;padding-bottom:.5rem;" id="cv-history">
+          <div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:13px;">No profiles generated yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Output panel -->
+    <div class="cv-output-panel">
+      <div class="cv-panel-header">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px;color:var(--green-dark);"><rect x="3" y="2" width="14" height="16" rx="2"/><line x1="7" y1="6" x2="13" y2="6"/><line x1="7" y1="9" x2="13" y2="9"/><line x1="7" y1="12" x2="10" y2="12"/></svg>
+        <h2>Bench Player Profile</h2>
+        <div id="cv-output-actions" style="display:none;gap:.5rem;display:none;">
+          <button class="btn btn-secondary btn-sm" onclick="printProfile()">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><polyline points="4 6 4 2 12 2 12 6"/><rect x="2" y="6" width="12" height="7" rx="1"/><polyline points="4 13 4 10 12 10 12 13"/></svg>
+            Print / Save PDF
+          </button>
+        </div>
+      </div>
+      <div class="cv-panel-body" id="cv-output-body">
+        <div style="text-align:center;padding:3rem 1.5rem;color:var(--text-muted);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;height:40px;margin-bottom:.75rem;opacity:.3;"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="12" y2="15"/></svg>
+          <p>Upload a CV and click Generate to create a branded Bench Player Profile.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SHAREPOINT -->
+<div class="view" id="view-sharepoint">
+  <div class="section-header">
+    <button class="btn btn-ghost btn-sm" onclick="showView('dashboard')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polyline points="10 4 6 8 10 12"/></svg> Back</button>
+    <h1>SharePoint Folders & Lists</h1>
+    <button class="btn btn-primary" onclick="openCreateModal()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg> Create from Template</button>
+  </div>
+  <div class="sp-layout">
+    <div class="sp-card">
+      <div class="sp-card-header"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px;color:var(--green-dark);"><rect x="2" y="4" width="16" height="12" rx="2"/><polyline points="2 8 10 13 18 8"/></svg><h2>Folder Templates</h2><button class="link-btn" onclick="showToast('Template editor coming soon')">Manage</button></div>
+      <div class="sp-card-body">
+        <div id="template-project" class="tpl-option selected" onclick="selectTemplate('project')">
+          <div class="tpl-radio"></div>
+          <div class="tpl-info"><h3>New Project</h3><p>Standard structure for a new client project</p><div class="tpl-folders"><span class="folder-chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h3l1 1h4v6H2z"/></svg>01 Contracts</span><span class="folder-chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h3l1 1h4v6H2z"/></svg>02 Deliverables</span><span class="folder-chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h3l1 1h4v6H2z"/></svg>03 Correspondence</span><span class="folder-chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h3l1 1h4v6H2z"/></svg>04 Reports</span></div></div>
+        </div>
+        <div id="template-tender" class="tpl-option" onclick="selectTemplate('tender')">
+          <div class="tpl-radio"></div>
+          <div class="tpl-info"><h3>Tender / EOI Response</h3><p>Tracking and building a tender submission</p><div class="tpl-folders"><span class="folder-chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h3l1 1h4v6H2z"/></svg>01 RFT Documents</span><span class="folder-chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h3l1 1h4v6H2z"/></svg>02 Response Drafts</span><span class="folder-chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h3l1 1h4v6H2z"/></svg>03 Supporting Evidence</span><span class="folder-chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h3l1 1h4v6H2z"/></svg>04 Final Submission</span></div></div>
+        </div>
+        <div id="template-consultant" class="tpl-option" onclick="selectTemplate('consultant')">
+          <div class="tpl-radio"></div>
+          <div class="tpl-info"><h3>New Consultant Onboarding</h3><p>Personnel folder for a new team member</p><div class="tpl-folders"><span class="folder-chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h3l1 1h4v6H2z"/></svg>Certifications</span><span class="folder-chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h3l1 1h4v6H2z"/></svg>Agreements</span><span class="folder-chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h3l1 1h4v6H2z"/></svg>CVs</span></div></div>
+        </div>
+        <div id="template-marketing" class="tpl-option" onclick="selectTemplate('marketing')">
+          <div class="tpl-radio"></div>
+          <div class="tpl-info"><h3>Marketing Campaign</h3><p>Assets and tracking for a new campaign</p><div class="tpl-folders"><span class="folder-chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h3l1 1h4v6H2z"/></svg>Assets</span><span class="folder-chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h3l1 1h4v6H2z"/></svg>Copy</span><span class="folder-chip"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h3l1 1h4v6H2z"/></svg>Reports</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1.5rem;">
+      <div class="sp-card">
+        <div class="sp-card-header"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px;color:var(--green-dark);"><circle cx="10" cy="10" r="7"/><polyline points="10 6 10 10 13 12"/></svg><h2>Recently Created</h2></div>
+        <div class="sp-card-body" style="padding-top:.5rem;padding-bottom:.5rem;">
+          <div class="recent-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h5l1 1h4v9H3z"/></svg><div class="ri-name">Project Westfield 2025</div><div class="ri-meta">1 hr ago</div><a href="https://edcompanyau.sharepoint.com/sites/Bench" target="_blank" class="link-btn">Open <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 2h3v3M10 2L5 7"/><path d="M5 3H3v6h6V7"/></svg></a></div>
+          <div class="recent-item"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h5l1 1h4v9H3z"/></svg><div class="ri-name">Tender — North Metro Rail EOI</div><div class="ri-meta">Yesterday</div><a href="https://edcompanyau.sharepoint.com/sites/Bench" target="_blank" class="link-btn">Open <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 2h3v3M10 2L5 7"/><path d="M5 3H3v6h6V7"/></svg></a></div>
+        </div>
+      </div>
+      <div class="sp-card">
+        <div class="sp-card-header"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px;color:var(--green-dark);"><polygon points="10 2 12.5 7.5 18 8 14 12 15.5 18 10 15 4.5 18 6 12 2 8 7.5 7.5 10 2"/></svg><h2>Quick Actions</h2></div>
+        <div class="sp-card-body" style="display:flex;flex-direction:column;gap:8px;">
+          <button class="btn btn-secondary" style="justify-content:flex-start;" onclick="openCreateModal()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M3 3h5l1 1h4v9H3z"/><line x1="8" y1="7" x2="8" y2="11"/><line x1="6" y1="9" x2="10" y2="9"/></svg> Create folder from template</button>
+          <a href="https://edcompanyau.sharepoint.com/sites/Bench" target="_blank" class="btn btn-secondary" style="justify-content:flex-start;text-decoration:none;"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M8 2l1.5 3 3.5.5-2.5 2.5.6 3.5L8 10l-3.1 1.5.6-3.5L3 5.5l3.5-.5z"/></svg> Open The Bench SharePoint</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ROLE TOGGLE (testing only — replaced by Azure AD login in production) -->
+<div class="role-toggle" onclick="toggleRole()" title="Testing only — simulates role-based access">
+  <div>
+    <div class="role-toggle-label">Viewing as</div>
+    <div class="role-toggle-hint">Click to switch</div>
+  </div>
+  <div class="role-pill admin" id="role-pill">Admin</div>
+</div>
+</main>
+
+<!-- CREATE FOLDER MODAL -->
+<div class="modal-backdrop" id="create-modal" onclick="closeModalOnBackdrop(event,'create-modal')">
+  <div class="modal">
+    <div class="modal-header"><h2>Create Folders from Template</h2><button class="btn btn-ghost btn-sm" style="padding:4px;" onclick="closeModal('create-modal')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px;"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Template</label><select class="form-select-full" id="modal-template" onchange="updateModalPreview(this.value)"><option value="project">New Project</option><option value="tender">Tender / EOI Response</option><option value="consultant">New Consultant Onboarding</option><option value="marketing">Marketing Campaign</option></select></div>
+      <div class="form-group"><label class="form-label">Folder Name</label><input class="form-input" id="modal-folder-name" placeholder="e.g. Project Westfield 2025" oninput="document.getElementById('preview-root-name').textContent=this.value||'[Folder Name]'" /></div>
+      <div class="form-group"><label class="form-label">Location in SharePoint</label><select class="form-select-full"><option>Shared Documents / Projects</option><option>Shared Documents / Tenders</option><option>Shared Documents / People</option><option>Shared Documents / Marketing</option></select></div>
+      <div style="background:var(--green-xlight);border:1.5px solid var(--green-light);border-radius:var(--radius-sm);padding:.85rem 1rem;margin-top:.5rem;">
+        <div style="font-size:12px;font-weight:700;color:var(--green-dark);margin-bottom:8px;">Preview — folders to be created:</div>
+        <div class="folder-tree">
+          <div class="fti" style="color:var(--text);font-weight:700;"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" style="width:14px;height:14px;color:var(--green-dark);"><path d="M1 3h4l1 1h7v8H1z"/></svg><span id="preview-root-name">[Folder Name]</span></div>
+          <div class="fti-child" id="preview-subfolders">
+            <div class="fti"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" style="width:12px;height:12px;"><path d="M1 3h4l1 1h7v8H1z"/></svg> 01 Contracts</div>
+            <div class="fti"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" style="width:12px;height:12px;"><path d="M1 3h4l1 1h7v8H1z"/></svg> 02 Deliverables</div>
+            <div class="fti"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" style="width:12px;height:12px;"><path d="M1 3h4l1 1h7v8H1z"/></svg> 03 Correspondence</div>
+            <div class="fti"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" style="width:12px;height:12px;"><path d="M1 3h4l1 1h7v8H1z"/></svg> 04 Reports</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('create-modal')">Cancel</button><button class="btn btn-primary" onclick="createFolders()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><polyline points="3 8 6 11 13 4"/></svg> Create in SharePoint</button></div>
+  </div>
+</div>
+
+<!-- RESPONSE DETAIL MODAL -->
+<div class="modal-backdrop" id="detail-modal" onclick="closeModalOnBackdrop(event,'detail-modal')">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header"><h2 id="detail-modal-title">Response</h2><button class="btn btn-ghost btn-sm" style="padding:4px;" onclick="closeModal('detail-modal')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px;"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg></button></div>
+    <div class="modal-body" id="detail-modal-body"></div>
+    <div class="modal-footer" id="detail-modal-footer"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 8 6 11 13 4"/></svg><span id="toast-text">Done</span></div>
+
+<script>
+// Dynamically load MSAL then boot the app
+(function(){
+  var s=document.createElement('script');
+  s.src='https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js';
+  s.onload=function(){ if(typeof appBoot==='function') appBoot(); };
+  s.onerror=function(){ console.error('MSAL script failed to load — check network/CORS'); };
+  document.head.appendChild(s);
+})();
+</script>
+<script>
+// ── FORM DEFINITIONS ─────────────────────────────────────────────────────────
+const FORMS = {
+
+  'new-project': {
+    id: 'new-project', title: 'New Project Form', slug: 'new-project',
+    description: 'Use this form to submit a new project for partner review and approval.',
+    sections: [
+      { title: 'Project Type & Requester', fields: [
+        { id: 'Project_Type',     label: 'Project Type',            type: 'radio',    req: true,  opts: ['Advisory','Secondment'] },
+        { id: 'Project_Requester',label: 'Project Requester',       type: 'text',     req: true,  ph: 'Full name' },
+        { id: 'Project_Requester_Email', label: 'Project Requester Email', type: 'email', req: true, ph: 'name@thebench.com.au' },
+        { id: 'Request_Date',     label: 'Request Date',            type: 'date',     req: true },
+      ]},
+      { title: 'Project Details', fields: [
+        { id: 'Project_Name',     label: 'Project Name',            type: 'text',     req: true,  ph: 'e.g. Westfield Infrastructure Review' },
+        { id: 'Client',           label: 'Client',                  type: 'text',     req: true,  ph: 'Client organisation name' },
+        { id: 'Project_Location', label: 'Project Location',        type: 'text',     req: true,  ph: 'City, State' },
+        { id: 'Scope_of_Work',   label: 'Scope of Work',            type: 'textarea', req: true,  ph: 'Describe the scope of work for this project.' },
+        { id: 'Project_Start_Date',         label: 'Project Start Date',            type: 'date', req: true },
+        { id: 'Estimated_Project_Completion_Date', label: 'Estimated Project Completion Date', type: 'date', req: false },
+        { id: 'Estimated_Project_Budget_AUD', label: 'Estimated Project Budget (AUD)', type: 'text', req: false, ph: 'e.g. $25,000' },
+        { id: 'Resources_Needed', label: 'Resources Needed',        type: 'textarea', req: false, ph: 'List any people, tools, or resources required.' },
+      ]},
+      { title: 'Compliance', fields: [
+        { id: 'Confidentiality_COI_Required', label: 'Will a confidentiality or conflict of interest form be required?', type: 'radio', req: true, opts: ['Yes','No'] },
+        { id: 'COI_Upload',      label: 'Upload form if available', type: 'file',     req: false, hint: 'Only shown if Yes is selected above.' },
+      ]},
+      { title: 'Opportunities, Risks & Other Details', fields: [
+        { id: 'Opportunities',   label: 'Opportunities',            type: 'textarea', req: false, ph: 'Tell us about the potential benefits of your engagement with this project — what can we expect to get out of it, and how can we make the most of it?', tall: true },
+        { id: 'Risks',           label: 'Risks',                    type: 'textarea', req: false, ph: 'Tell us about any risks associated with your engagement in this project.', tall: true },
+        { id: 'Other_Details',   label: 'Other Details',            type: 'textarea', req: false, ph: 'Will you be working out of office? Will significant travel be involved? Are there any third parties involved? etc.', tall: true },
+      ]},
+    ],
+    responses: []
+  },
+
+  'project-highlights': {
+    id: 'project-highlights', title: 'Project Highlights Form', slug: 'project-highlights',
+    description: 'Submit details about a completed project. Your response will be used to automatically generate a Project Highlights one-pager.',
+    sections: [
+      { title: 'Project Identification', fields: [
+        { id: 'Project_Title',   label: 'Project Title',            type: 'text',     req: true,  ph: 'Official project title' },
+        { id: 'Responder_Email', label: 'Responder Email',          type: 'email',    req: true,  ph: 'name@thebench.com.au' },
+        { id: 'The_Bench_Project_Code', label: 'The Bench Project Code', type: 'text', req: true, ph: 'e.g. B26-004' },
+        { id: 'Client',          label: 'Client',                   type: 'text',     req: true,  ph: 'Client organisation name' },
+      ]},
+      { title: 'Project Details', fields: [
+        { id: 'Client_Contact_Details', label: 'Client Contact Details', type: 'textarea', req: false, ph: 'Name, Email, Phone' },
+        { id: 'Project_Dates',   label: 'Project Dates',            type: 'text',     req: true,  ph: 'Month Year – Month Year  (e.g. Jan 2024 – Mar 2025)' },
+        { id: 'Value_of_Engagement', label: 'Value of Engagement', type: 'text',     req: false, ph: 'e.g. $50,000' },
+        { id: 'Bench_Warmers_Involved', label: 'Bench Warmers Involved', type: 'textarea', req: false, ph: 'List names of team members who worked on this project.' },
+        { id: 'Scope_of_Work',   label: 'Scope of Work',            type: 'textarea', req: true,  ph: 'Describe the scope of work delivered.' },
+      ]},
+      { title: 'Highlight Content', fields: [
+        { id: 'Our_Involvement', label: 'Our Involvement',          type: 'textarea', req: true,  ph: "Briefly describe our role in the project. Highlight how the client benefitted from our engagement with them, particularly citing any financial or quality improvements attributed to our work.", tall: true },
+        { id: 'Client_Testimonial', label: 'Client Testimonial',   type: 'textarea', req: false, ph: 'Paste a testimonial received from the client.', tall: true },
+      ]},
+      { title: 'Feedback & Learnings', fields: [
+        { id: 'The_Bench_Feedback', label: 'The Bench Feedback',   type: 'textarea', req: false, ph: "Describe any feedback that you and your team have regarding the project on our end. Did you and your team work well in the role you were placed in? Did you feel well-suited for the role? How could The Bench's end of management be improved?", tall: true },
+        { id: 'Key_Takeaways',   label: 'Key Takeaways',           type: 'textarea', req: false, ph: 'Based on client and Bench feedback, what were the most important learnings from the project?', tall: true },
+      ]},
+    ],
+    responses: []
+  },
+
+  'rsvp': {
+    id: 'rsvp', title: 'Bench Chambers RSVP', slug: 'bench-chambers-rsvp',
+    description: 'RSVP for the next Bench Chambers event.',
+    sections: [
+      { title: 'Your Details', fields: [
+        { id: 'Name',            label: 'Name',                     type: 'text',     req: true,  ph: 'Full name' },
+        { id: 'Attending',       label: 'I will be attending the next Bench Chambers event', type: 'radio', req: true, opts: ['Yes','No'] },
+      ]},
+    ],
+    responses: []
+  }
+};
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let activeFormId = 'new-project';
+
+// ── NAVIGATION ───────────────────────────────────────────────────────────────
+function showView(n) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('view-' + n).classList.add('active');
+  document.getElementById('nav-' + n).classList.add('active');
+  window.scrollTo(0, 0);
+  updateDashCount();
+}
+
+function updateDashCount() {
+  const t = Object.values(FORMS).reduce((s, f) => s + f.responses.length, 0);
+  const el = document.getElementById('dash-resp-count');
+  if (el) el.textContent = t + ' response' + (t !== 1 ? 's' : '');
+}
+
+// ── FORM SELECTION ────────────────────────────────────────────────────────────
+function selectForm(id) {
+  activeFormId = id;
+  document.querySelectorAll('.fli').forEach(i => i.classList.remove('active'));
+  document.getElementById('fl-' + id).classList.add('active');
+  const f = FORMS[id];
+  document.getElementById('active-form-title').textContent = f.title;
+  document.getElementById('share-url').value = 'https://hub.thebench.com.au/forms/' + f.slug;
+  document.getElementById('embed-code').textContent = '<iframe src="https://hub.thebench.com.au/forms/' + f.slug + '" width="100%" height="700" frameborder="0"></iframe>';
+  switchTab('form');
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function switchTab(t) {
+  ['form', 'responses', 'share'].forEach(x => {
+    document.getElementById('tab-' + x).style.display = x === t ? 'block' : 'none';
+    document.getElementById('tb-' + x).classList.toggle('active', x === t);
+  });
+  if (t === 'form') renderFormUI(activeFormId);
+  if (t === 'responses') renderResponses();
+  document.getElementById('resp-badge').textContent = FORMS[activeFormId].responses.length;
+}
+
+// ── FORM RENDERER ─────────────────────────────────────────────────────────────
+function renderFormUI(fid) {
+  const f = FORMS[fid];
+  let h = `<div class="fv-wrap"><div class="fv-title">${f.title}</div><div class="fv-desc">${f.description}</div>`;
+
+  f.sections.forEach(sec => {
+    h += `<div class="fv-section">${sec.title}</div>`;
+    let i = 0;
+    while (i < sec.fields.length) {
+      const fi = sec.fields[i];
+      const nf = sec.fields[i + 1];
+      // Pair short single-line fields side by side
+      const short = x => x && ['text', 'email', 'date'].includes(x.type) && !x.tall;
+      if (short(fi) && short(nf)) {
+        h += `<div class="fv-inline">${renderField(fi)}${renderField(nf)}</div>`;
+        i += 2;
+      } else {
+        h += renderField(fi);
+        i++;
+      }
+    }
+  });
+
+  h += `<div class="form-submit-row">
+    <button class="btn btn-primary" onclick="submitForm('${fid}')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" style="width:14px;height:14px;"><polyline points="3 8 6 11 13 4"/></svg>
+      Submit Form
+    </button>
+    <button class="btn btn-secondary" onclick="renderFormUI('${fid}')">Clear</button>
+  </div></div>`;
+
+  document.getElementById('tab-form').innerHTML = h;
+
+  // Wire up conditional file upload for new-project
+  if (fid === 'new-project') {
+    const radios = document.querySelectorAll('input[name="fi-Confidentiality_COI_Required"]');
+    radios.forEach(r => r.addEventListener('change', () => {
+      const block = document.getElementById('coi-conditional');
+      if (block) block.style.display = r.value === 'Yes' ? 'block' : 'none';
+    }));
+  }
+
+  // Wire up file upload labels
+  document.querySelectorAll('.fv-upload-area').forEach(area => {
+    area.addEventListener('click', () => area.querySelector('input[type="file"]').click());
+    const inp = area.querySelector('input[type="file"]');
+    if (inp) inp.addEventListener('change', () => {
+      const fn = area.querySelector('.fv-upload-name');
+      if (fn) fn.textContent = inp.files[0] ? inp.files[0].name : '';
+    });
+  });
+}
+
+function renderField(fi) {
+  const req = fi.req ? '<span class="req">*</span>' : '';
+  let inp = '';
+
+  if (['text', 'email', 'date'].includes(fi.type)) {
+    inp = `<input class="fv-input" type="${fi.type}" id="fi-${fi.id}" placeholder="${fi.ph || ''}" />`;
+  } else if (fi.type === 'textarea') {
+    inp = `<textarea class="fv-textarea${fi.tall ? ' tall' : ''}" id="fi-${fi.id}" placeholder="${fi.ph || ''}"></textarea>`;
+  } else if (fi.type === 'select') {
+    inp = `<select class="fv-select" id="fi-${fi.id}">${fi.opts.map(o => `<option value="${o.includes('Select') ? '' : o}">${o}</option>`).join('')}</select>`;
+  } else if (fi.type === 'radio') {
+    inp = `<div class="fv-radio-group" id="fi-${fi.id}">${fi.opts.map(o => `<label class="fv-option-label"><input type="radio" name="fi-${fi.id}" value="${o}"/> ${o}</label>`).join('')}</div>`;
+  } else if (fi.type === 'file') {
+    // Conditional: only shown when COI = Yes
+    return `<div id="coi-conditional" style="display:none;">
+      <div class="fv-group">
+        <label class="fv-label">${fi.label}${req}</label>
+        <div class="fv-upload-area" id="fi-${fi.id}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:24px;height:24px;color:var(--text-muted);"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p>Click to upload</p>
+          <input type="file" accept=".pdf,.doc,.docx" />
+          <div class="fv-upload-name"></div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  return `<div class="fv-group"><label class="fv-label">${fi.label}${req}</label>${fi.hint ? `<div class="fv-hint">${fi.hint}</div>` : ''}${inp}</div>`;
+}
+
+// ── STORAGE LAYER ─────────────────────────────────────────────────────────────
+// Currently uses localStorage for persistence.
+// To switch to Azure Graph API, replace saveResponses() and loadAllResponses()
+// with Graph API calls — everything else stays the same.
+
+const STORAGE_KEY = 'thebench_responses';
+
+function saveResponses() {
+  const data = {};
+  Object.keys(FORMS).forEach(fid => { data[fid] = FORMS[fid].responses; });
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) { console.warn('Storage save failed:', e); }
+}
+
+function loadAllResponses() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    Object.keys(FORMS).forEach(fid => {
+      if (data[fid] && Array.isArray(data[fid])) FORMS[fid].responses = data[fid];
+    });
+  } catch(e) { console.warn('Storage load failed:', e); }
+}
+
+// ── FORM SUBMISSION ───────────────────────────────────────────────────────────
+function submitForm(fid) {
+  const f = FORMS[fid];
+  const entry = { _id: Date.now(), _submitted: new Date().toLocaleDateString('en-AU'), _status: 'New' };
+  let valid = true, firstBad = null;
+
+  f.sections.forEach(sec => sec.fields.forEach(fi => {
+    if (fi.type === 'file') return;
+    let v = '';
+    if (fi.type === 'radio') {
+      const c = document.querySelector(`input[name="fi-${fi.id}"]:checked`);
+      v = c ? c.value : '';
+    } else {
+      const el = document.getElementById('fi-' + fi.id);
+      v = el ? el.value.trim() : '';
+    }
+    if (fi.req && !v) {
+      valid = false;
+      const el = document.getElementById('fi-' + fi.id);
+      if (el && !firstBad) { el.style.borderColor = '#dc2626'; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); firstBad = el; }
+    }
+    entry[fi.id] = v;
+  }));
+
+  if (!valid) { showToast('Please fill in all required fields.'); return; }
+
+  f.responses.unshift(entry);
+  saveResponses(); // ← swap this for a Graph API call when Azure is ready
+  if (fid === 'rsvp') syncRSVPToEmailList(entry);
+
+  // Activity feed
+  const feed = document.getElementById('activity-feed');
+  const nameKey = fid === 'rsvp' ? 'Name' : (fid === 'project-highlights' ? 'Project_Title' : 'Project_Requester');
+  const nm = entry[nameKey] || 'Someone';
+  const item = document.createElement('div');
+  item.className = 'act-item';
+  item.innerHTML = `<div class="act-dot"></div><div class="act-text">New response to <strong>${f.title}</strong>${fid === 'rsvp' ? ' from ' + nm : ': ' + nm}</div><div class="act-time">Just now</div>`;
+  feed.insertBefore(item, feed.firstChild);
+  const ph = feed.querySelector('.act-dot.grey');
+  if (ph && feed.children.length > 3) ph.closest('.act-item').remove();
+
+  document.getElementById('resp-badge').textContent = f.responses.length;
+  updateDashCount();
+  renderFormUI(fid);
+  showToast('Response submitted!', 'success');
+}
+
+// ── RESPONSES TABLE ───────────────────────────────────────────────────────────
+function renderResponses() {
+  const f = FORMS[activeFormId];
+  const s = (document.getElementById('resp-search').value || '').toLowerCase();
+  const fl = document.getElementById('resp-filter').value;
+  const rows = f.responses.filter(r => (!fl || r._status === fl) && (!s || JSON.stringify(r).toLowerCase().includes(s)));
+  const wrap = document.getElementById('resp-table-wrap');
+
+  if (!rows.length) {
+    wrap.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg><p>No responses yet${fl || s ? ' matching your filters' : ''}.</p></div>`;
+    return;
+  }
+
+  const cols = {
+    'new-project':        [['Project_Requester','Requester'],['Project_Name','Project'],['Client','Client'],['Project_Type','Type'],['Project_Start_Date','Start'],['_submitted','Submitted'],['_status','Status']],
+    'project-highlights': [['Project_Title','Project'],['The_Bench_Project_Code','Code'],['Client','Client'],['Project_Dates','Dates'],['_submitted','Submitted'],['_status','Status']],
+    'rsvp':               [['Name','Name'],['Attending','Attending'],['_submitted','Submitted'],['_status','Status']],
+  }[activeFormId];
+
+  let h = `<table class="data-table"><thead><tr>${cols.map(([, l]) => `<th>${l}</th>`).join('')}<th></th></tr></thead><tbody>`;
+  rows.forEach(r => {
+    h += `<tr>`;
+    cols.forEach(([k]) => {
+      if (k === '_status') h += `<td><span class="sdot ${r._status.toLowerCase()}">${r._status}</span></td>`;
+      else h += `<td>${r[k] || '<span style="color:var(--text-muted)">—</span>'}</td>`;
+    });
+    h += `<td><button class="link-btn" onclick="openDetail(${r._id})">View <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 2 10 6 5 10"/></svg></button></td></tr>`;
+  });
+  h += `</tbody></table>`;
+  wrap.innerHTML = h;
+}
+
+function openDetail(id) {
+  const f = FORMS[activeFormId];
+  const r = f.responses.find(x => x._id === id);
+  if (!r) return;
+  document.getElementById('detail-modal-title').textContent = f.title + ' — Response';
+  let body = `<div style="font-size:12px;color:var(--text-muted);margin-bottom:1rem;">Submitted ${r._submitted} &nbsp;·&nbsp; Status: <span class="sdot ${r._status.toLowerCase()}" style="font-size:12px;">${r._status}</span></div>`;
+  f.sections.forEach(sec => {
+    body += `<div style="font-size:11px;font-weight:700;color:var(--green-dark);text-transform:uppercase;letter-spacing:.07em;margin:1rem 0 .5rem;border-bottom:1px solid var(--green-light);padding-bottom:4px;">${sec.title}</div>`;
+    sec.fields.forEach(fi => {
+      if (fi.type === 'file') return;
+      const v = r[fi.id];
+      if (!v) return;
+      body += `<div style="margin-bottom:.75rem;"><div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:2px;">${fi.label}</div><div style="font-size:13.5px;color:var(--text);white-space:pre-wrap;">${v}</div></div>`;
+    });
+  });
+  document.getElementById('detail-modal-body').innerHTML = body;
+  const statuses = ['New', 'Reviewed', 'Approved', 'Declined'];
+  document.getElementById('detail-modal-footer').innerHTML =
+    `<select class="form-select-full" style="max-width:160px;" id="dss">${statuses.map(s => `<option value="${s}"${r._status === s ? ' selected' : ''}>${s}</option>`).join('')}</select>
+     <button class="btn btn-secondary" onclick="updateStatus(${id})">Update Status</button>
+     <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="closeModal('detail-modal')">Close</button>`;
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function updateStatus(id) {
+  const r = FORMS[activeFormId].responses.find(x => x._id === id);
+  r._status = document.getElementById('dss').value;
+  saveResponses(); // persist status change too
+  closeModal('detail-modal');
+  renderResponses();
+  showToast('Status updated to ' + r._status, 'success');
+}
+
+function exportCSV() {
+  const f = FORMS[activeFormId];
+  if (!f.responses.length) { showToast('No responses to export.'); return; }
+  const keys = Object.keys(f.responses[0]).filter(k => !k.startsWith('_'));
+  const csv = [['Submitted', 'Status', ...keys].join(','),
+    ...f.responses.map(r => [r._submitted, r._status, ...keys.map(k => '"' + (r[k] || '').replace(/"/g, '""') + '"')].join(','))
+  ].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv,' + encodeURIComponent(csv);
+  a.download = f.slug + '-responses.csv';
+  a.click();
+  showToast('CSV exported!', 'success');
+}
+
+
+// ── LISTS DATA ────────────────────────────────────────────────────────────────
+const LISTS = {
+  'project-register': {
+    id: 'project-register',
+    title: 'Project Register',
+    items: [],
+    cols: [
+      { id: 'Project_Code',    label: 'Project Code',   type: 'text',   width: '100px', readonly: true },
+      { id: 'Project_Name',    label: 'Project Name',   type: 'text',   width: '160px' },
+      { id: 'Client',          label: 'Client',         type: 'text',   width: '140px' },
+      { id: 'Project_Type',    label: 'Type',           type: 'select', width: '110px', opts: ['Advisory','Secondment'] },
+      { id: 'Project_Requester', label: 'Requester',    type: 'text',   width: '130px' },
+      { id: 'Project_Location',label: 'Location',       type: 'text',   width: '120px' },
+      { id: 'Project_Start_Date', label: 'Start Date',  type: 'date',   width: '110px' },
+      { id: 'Estimated_Project_Completion_Date', label: 'End Date', type: 'date', width: '110px' },
+      { id: 'Estimated_Project_Budget_AUD', label: 'Budget',  type: 'text',   width: '100px' },
+      { id: 'Status',          label: 'Status',         type: 'select', width: '110px', opts: ['Pending Approval','Active','Completed','Cancelled'] },
+    ]
+  },
+  'availability': {
+    id: 'availability',
+    title: 'Bench Warmer Availability',
+    items: [],
+    cols: [
+      { id: 'Name',         label: 'Name',              type: 'text',   width: '160px' },
+      { id: 'Role',         label: 'Role',              type: 'text',   width: '160px' },
+      { id: 'Email',        label: 'Email',             type: 'email',  width: '180px' },
+      { id: 'Status',       label: 'Availability',      type: 'select', width: '140px', opts: ['Available','Unavailable','Available from date','Not set'] },
+      { id: 'Available_From', label: 'Available From',  type: 'date',   width: '120px' },
+      { id: 'Last_Updated', label: 'Last Updated',      type: 'text',   width: '120px', readonly: true },
+    ]
+  },
+  'email-list': {
+    id: 'email-list',
+    title: 'Bench Chambers Email List',
+    items: [],
+    cols: [
+      { id: 'Name',            label: 'Name',           type: 'text',   width: '160px' },
+      { id: 'Email',           label: 'Email',          type: 'email',  width: '200px' },
+      { id: 'Company',         label: 'Company',        type: 'text',   width: '160px' },
+      { id: 'RSVP',            label: 'RSVP Next Event',type: 'select', width: '130px', opts: ['Yes','No','—'] },
+      { id: 'Date_Added',      label: 'Date Added',     type: 'text',   width: '110px', readonly: true },
+    ]
+  }
+};
+
+let activeListId = 'project-register';
+let editingItemId = null;
+
+// ── LIST STORAGE ──────────────────────────────────────────────────────────────
+const LIST_KEY = 'thebench_lists';
+
+function saveLists() {
+  const data = {};
+  Object.keys(LISTS).forEach(lid => { data[lid] = LISTS[lid].items; });
+  try { localStorage.setItem(LIST_KEY, JSON.stringify(data)); } catch(e) { console.warn('List save failed:', e); }
+}
+
+function loadAllLists() {
+  try {
+    const raw = localStorage.getItem(LIST_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    Object.keys(LISTS).forEach(lid => {
+      if (data[lid] && Array.isArray(data[lid])) LISTS[lid].items = data[lid];
+    });
+  } catch(e) { console.warn('List load failed:', e); }
+}
+
+// ── PROJECT CODE GENERATOR ────────────────────────────────────────────────────
+function generateProjectCode() {
+  const year = new Date().getFullYear().toString().slice(-2);
+  const count = LISTS['project-register'].items.length + 1;
+  return 'B' + year + '-' + String(count).padStart(3, '0');
+}
+
+// ── LIST SELECTION ────────────────────────────────────────────────────────────
+function selectList(lid) {
+  activeListId = lid;
+  editingItemId = null;
+  document.querySelectorAll('.list-nav-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('ln-' + lid).classList.add('active');
+  document.getElementById('active-list-title').textContent = LISTS[lid].title;
+  renderList();
+  updateListCounts();
+}
+
+function updateListCounts() {
+  Object.keys(LISTS).forEach(lid => {
+    const el = document.getElementById('lc-' + lid);
+    if (el) el.textContent = LISTS[lid].items.length + ' item' + (LISTS[lid].items.length !== 1 ? 's' : '');
+  });
+  // Update dashboard count
+  const total = Object.values(LISTS).reduce((s, l) => s + l.items.length, 0);
+  const el = document.getElementById('dash-list-count');
+  if (el) el.textContent = total + ' item' + (total !== 1 ? 's' : '');
+}
+
+// ── LIST RENDERER ─────────────────────────────────────────────────────────────
+function renderList() {
+  const list = LISTS[activeListId];
+  const s = (document.getElementById('list-search').value || '').toLowerCase();
+  const rows = list.items.filter(r => !s || JSON.stringify(r).toLowerCase().includes(s));
+  const wrap = document.getElementById('list-table-wrap');
+
+  if (!rows.length) {
+    wrap.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><p>No items yet${s ? ' matching your search' : ''}.</p></div>`;
+    return;
+  }
+
+  const visibleCols = list.cols.slice(0, 6); // show first 6 cols in table, rest in edit modal
+
+  let h = `<table class="ie-table"><thead><tr>`;
+  visibleCols.forEach(c => h += `<th style="min-width:${c.width}">${c.label}</th>`);
+  h += `<th></th></tr></thead><tbody>`;
+
+  rows.forEach(r => {
+    const isEditing = editingItemId === r._id;
+    h += `<tr class="${isEditing ? 'editing' : ''}">`;
+    visibleCols.forEach(c => {
+      const val = r[c.id] || '';
+      if (isEditing && !c.readonly) {
+        if (c.type === 'select') {
+          h += `<td><select class="ie-cell-select" id="ie-${c.id}">${c.opts.map(o => `<option value="${o}"${val===o?' selected':''}>${o}</option>`).join('')}</select></td>`;
+        } else {
+          h += `<td><input class="ie-cell-input" type="${c.type}" id="ie-${c.id}" value="${val}" /></td>`;
+        }
+      } else {
+        h += `<td>${renderCellValue(c, val)}</td>`;
+      }
+    });
+    if (isEditing) {
+      h += `<td><div class="ie-row-actions">
+        <button class="btn btn-primary btn-sm" onclick="saveItemEdit(${r._id})">Save</button>
+        <button class="btn btn-secondary btn-sm" onclick="cancelEdit()">Cancel</button>
+        <button class="btn btn-sm" style="color:#dc2626;background:#fee2e2;border:none;" onclick="deleteItem(${r._id})">Delete</button>
+      </div></td>`;
+    } else {
+      h += `<td><div class="ie-row-actions">
+        <button class="link-btn" onclick="startEdit(${r._id})">Edit <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2l2 2-6 6H2V8z"/></svg></button>
+        <button class="link-btn" onclick="openItemDetail(${r._id})" style="margin-left:6px;">View <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 2 10 6 5 10"/></svg></button>
+      </div></td>`;
+    }
+    h += `</tr>`;
+  });
+
+  h += `</tbody></table>`;
+  wrap.innerHTML = h;
+}
+
+function renderCellValue(col, val) {
+  if (!val) return `<span style="color:var(--text-muted)">—</span>`;
+  if (col.id === 'Project_Code') return `<span class="proj-code">${val}</span>`;
+  if (col.id === 'Status') {
+    const map = {'Pending Approval':'pending','Active':'active','Completed':'completed','Cancelled':'cancelled'};
+    return `<span class="pill pill-${map[val]||'pending'}">${val}</span>`;
+  }
+  if (col.id === 'RSVP') return `<span class="pill pill-${val.toLowerCase()==='yes'?'yes':'no'}">${val}</span>`;
+  return `<span class="ie-cell-view">${val}</span>`;
+}
+
+// ── INLINE EDITING ────────────────────────────────────────────────────────────
+function startEdit(id) {
+  editingItemId = id;
+  renderList();
+}
+
+function cancelEdit() {
+  editingItemId = null;
+  renderList();
+}
+
+function saveItemEdit(id) {
+  const list = LISTS[activeListId];
+  const item = list.items.find(x => x._id === id);
+  list.cols.forEach(c => {
+    if (c.readonly) return;
+    const el = document.getElementById('ie-' + c.id);
+    if (el) item[c.id] = el.value;
+  });
+  editingItemId = null;
+  saveLists();
+  renderList();
+  updateListCounts();
+  showToast('Item updated', 'success');
+}
+
+function deleteItem(id) {
+  const list = LISTS[activeListId];
+  list.items = list.items.filter(x => x._id !== id);
+  editingItemId = null;
+  saveLists();
+  renderList();
+  updateListCounts();
+  showToast('Item deleted');
+}
+
+// ── ITEM DETAIL MODAL ─────────────────────────────────────────────────────────
+function openItemDetail(id) {
+  const list = LISTS[activeListId];
+  const item = list.items.find(x => x._id === id);
+  if (!item) return;
+
+  document.getElementById('detail-modal-title').textContent = list.title + ' — Item';
+  let body = '';
+  list.cols.forEach(c => {
+    const v = item[c.id];
+    body += `<div style="margin-bottom:.75rem;">
+      <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:2px;">${c.label}</div>
+      <div style="font-size:13.5px;color:var(--text);">${renderCellValue(c, v||'')}</div>
+    </div>`;
+  });
+  document.getElementById('detail-modal-body').innerHTML = body;
+  document.getElementById('detail-modal-footer').innerHTML =
+    `<button class="btn btn-secondary" onclick="closeModal('detail-modal');startEdit(${id});">Edit</button>
+     <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="closeModal('detail-modal')">Close</button>`;
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+// ── ADD ITEM MODAL ────────────────────────────────────────────────────────────
+function openAddItemModal() {
+  const list = LISTS[activeListId];
+  document.getElementById('detail-modal-title').textContent = 'Add Item — ' + list.title;
+
+  let body = '';
+  list.cols.forEach(c => {
+    if (c.readonly) return;
+    const req = '';
+    let inp = '';
+    if (c.type === 'select') {
+      inp = `<select class="form-select-full" id="add-${c.id}">${c.opts.map(o => `<option value="${o}">${o}</option>`).join('')}</select>`;
+    } else {
+      inp = `<input class="form-input" type="${c.type}" id="add-${c.id}" placeholder="${c.label}" />`;
+    }
+    body += `<div class="form-group"><label class="form-label">${c.label}</label>${inp}</div>`;
+  });
+
+  document.getElementById('detail-modal-body').innerHTML = body;
+  document.getElementById('detail-modal-footer').innerHTML =
+    `<button class="btn btn-secondary" onclick="closeModal('detail-modal')">Cancel</button>
+     <button class="btn btn-primary" onclick="saveNewItem()">
+       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" style="width:13px;height:13px;"><polyline points="3 8 6 11 13 4"/></svg>
+       Add Item
+     </button>`;
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function saveNewItem() {
+  const list = LISTS[activeListId];
+  const item = { _id: Date.now() };
+
+  // Auto-generate project code for project register
+  if (activeListId === 'project-register') {
+    item.Project_Code = generateProjectCode();
+    item.Status = 'Active';
+  }
+  if (activeListId === 'email-list') {
+    item.Date_Added = new Date().toLocaleDateString('en-AU');
+    item.RSVP = '—';
+  }
+
+  list.cols.forEach(c => {
+    if (c.readonly) return;
+    const el = document.getElementById('add-' + c.id);
+    if (el) item[c.id] = el.value;
+  });
+
+  list.items.unshift(item);
+  saveLists();
+  closeModal('detail-modal');
+  renderList();
+  updateListCounts();
+  showToast('Item added', 'success');
+}
+
+// ── AUTO-ADD RSVP TO EMAIL LIST ───────────────────────────────────────────────
+function syncRSVPToEmailList(entry) {
+  const emailList = LISTS['email-list'];
+  const existing = emailList.items.find(x => x.Email && x.Email.toLowerCase() === (entry.email || '').toLowerCase());
+  if (existing) {
+    // Update RSVP status on existing contact
+    existing.RSVP = entry.Attending === 'Yes' ? 'Yes' : 'No';
+    showToast('RSVP updated in Email List', 'success');
+  } else {
+    // Add new contact
+    emailList.items.unshift({
+      _id: Date.now() + 1,
+      Name: entry.Name || '',
+      Email: entry.email || '',
+      Company: '',
+      RSVP: entry.Attending === 'Yes' ? 'Yes' : 'No',
+      Date_Added: new Date().toLocaleDateString('en-AU')
+    });
+    showToast('Added to Bench Chambers Email List', 'success');
+  }
+  saveLists();
+  updateListCounts();
+}
+
+// ── LIST CSV EXPORT ───────────────────────────────────────────────────────────
+function exportListCSV() {
+  const list = LISTS[activeListId];
+  if (!list.items.length) { showToast('No items to export.'); return; }
+  const keys = list.cols.map(c => c.id);
+  const csv = [list.cols.map(c => c.label).join(','),
+    ...list.items.map(r => keys.map(k => '"' + (r[k] || '').replace(/"/g, '""') + '"').join(','))
+  ].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv,' + encodeURIComponent(csv);
+  a.download = list.id + '.csv';
+  a.click();
+  showToast('CSV exported!', 'success');
+}
+
+// ── SHAREPOINT ────────────────────────────────────────────────────────────────
+const tplFolders = {
+  project:    ['01 Contracts','02 Deliverables','03 Correspondence','04 Reports'],
+  tender:     ['01 RFT Documents','02 Response Drafts','03 Supporting Evidence','04 Final Submission'],
+  consultant: ['Certifications','Agreements','CVs'],
+  marketing:  ['Assets','Copy','Reports']
+};
+
+function selectTemplate(n) {
+  document.querySelectorAll('.tpl-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('template-' + n).classList.add('selected');
+}
+
+function updateModalPreview(t) {
+  document.getElementById('preview-subfolders').innerHTML = (tplFolders[t] || []).map(f =>
+    `<div class="fti"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" style="width:12px;height:12px;"><path d="M1 3h4l1 1h7v8H1z"/></svg> ${f}</div>`
+  ).join('');
+}
+
+function openCreateModal() { document.getElementById('create-modal').classList.add('open'); }
+
+function createFolders() {
+  const n = document.getElementById('modal-folder-name').value.trim();
+  if (!n) { document.getElementById('modal-folder-name').focus(); return; }
+  closeModal('create-modal');
+  showToast('Folders created in SharePoint!', 'success');
+  const feed = document.getElementById('activity-feed');
+  const item = document.createElement('div');
+  item.className = 'act-item';
+  item.innerHTML = `<div class="act-dot grey"></div><div class="act-text">Folder structure created for <strong>${n}</strong></div><div class="act-time">Just now</div>`;
+  feed.insertBefore(item, feed.firstChild);
+}
+
+
+
+// ── AVAILABILITY ──────────────────────────────────────────────────────────────
+let currentAvailView = 'quick';
+let selectedAvailStatus = null;
+
+function switchAvailView(view) {
+  currentAvailView = view;
+  if (view === 'admin') {
+    document.getElementById('avail-quick-view').style.display = 'none';
+    document.getElementById('avail-admin-view').style.display = 'block';
+    document.getElementById('avail-view-toggle-label').textContent = 'Warmer View';
+    document.querySelector('#nav-availability ~ button, #avail-view-toggle-label')
+    renderAvailAdmin();
+  } else {
+    document.getElementById('avail-quick-view').style.display = 'block';
+    document.getElementById('avail-admin-view').style.display = 'none';
+    document.getElementById('avail-view-toggle-label').textContent = 'Admin View';
+  }
+  document.getElementById('avail-view-toggle-label').textContent = view === 'admin' ? 'Warmer View' : 'Admin View';
+  document.querySelectorAll('.section-header .btn-secondary').forEach(btn => {
+    btn.setAttribute('onclick', "switchAvailView('" + (view === 'admin' ? 'quick' : 'admin') + "')");
+  });
+}
+
+function populateWarmerSelect() {
+  const sel = document.getElementById('avail-warmer-select');
+  const items = LISTS['availability'].items;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Select your name —</option>' +
+    items.map(w => `<option value="${w._id}" ${w._id == current ? 'selected' : ''}>${w.Name}${w.Role ? ' — ' + w.Role : ''}</option>`).join('');
+}
+
+function loadWarmerQuickUpdate() {
+  const id = parseInt(document.getElementById('avail-warmer-select').value);
+  const panel = document.getElementById('avail-quick-panel');
+  if (!id) { panel.style.display = 'none'; return; }
+  const w = LISTS['availability'].items.find(x => x._id === id);
+  if (!w) return;
+
+  document.getElementById('avail-quick-name').textContent = w.Name;
+  panel.style.display = 'block';
+  selectedAvailStatus = null;
+
+  // Reset buttons
+  ['available','unavailable'].forEach(s => {
+    document.getElementById('avail-btn-' + s).className = 'avail-big-btn';
+  });
+  document.getElementById('avail-date-row').classList.remove('show');
+
+  // Restore current status
+  if (w.Status === 'Available') selectAvailStatus('available', false);
+  else if (w.Status === 'Unavailable') selectAvailStatus('unavailable', false);
+  else if (w.Status === 'Available from date') {
+    selectAvailStatus('date', false);
+    if (w.Available_From) document.getElementById('avail-date-picker').value = w.Available_From;
+  }
+
+  const lu = w.Last_Updated ? 'Last updated ' + w.Last_Updated : '';
+  document.getElementById('avail-last-updated').textContent = lu;
+}
+
+function selectAvailStatus(status, resetDate = true) {
+  selectedAvailStatus = status;
+  ['available','unavailable'].forEach(s => {
+    const btn = document.getElementById('avail-btn-' + s);
+    if (btn) btn.className = 'avail-big-btn' + (s === status ? ' sel-' + s : '');
+  });
+  const dateRow = document.getElementById('avail-date-row');
+  if (status === 'date') {
+    dateRow.classList.add('show');
+    document.getElementById('avail-btn-unavailable').className = 'avail-big-btn';
+    document.getElementById('avail-btn-available').className = 'avail-big-btn sel-date';
+    if (resetDate) document.getElementById('avail-date-picker').value = '';
+  } else {
+    dateRow.classList.remove('show');
+  }
+}
+
+function saveAvailability() {
+  const id = parseInt(document.getElementById('avail-warmer-select').value);
+  const w = LISTS['availability'].items.find(x => x._id === id);
+  if (!w || !selectedAvailStatus) { showToast('Please select an availability status.'); return; }
+
+  const dateVal = document.getElementById('avail-date-picker').value;
+  if (selectedAvailStatus === 'date' && !dateVal) { showToast('Please select a date.'); return; }
+
+  w.Status = selectedAvailStatus === 'available' ? 'Available'
+           : selectedAvailStatus === 'unavailable' ? 'Unavailable'
+           : 'Available from date';
+  w.Available_From = selectedAvailStatus === 'date' ? dateVal : '';
+  w.Last_Updated = new Date().toLocaleDateString('en-AU');
+
+  saveLists();
+  updateListCounts();
+  updateAvailDashCount();
+  document.getElementById('avail-last-updated').textContent = 'Last updated ' + w.Last_Updated;
+  showToast('Availability updated!', 'success');
+
+  // Add to activity feed
+  const feed = document.getElementById('activity-feed');
+  const item = document.createElement('div');
+  item.className = 'act-item';
+  const statusText = w.Status + (w.Available_From ? ' from ' + new Date(w.Available_From).toLocaleDateString('en-AU') : '');
+  item.innerHTML = `<div class="act-dot"></div><div class="act-text"><strong>${w.Name}</strong> set availability: ${statusText}</div><div class="act-time">Just now</div>`;
+  feed.insertBefore(item, feed.firstChild);
+}
+
+function renderAvailAdmin() {
+  const s = (document.getElementById('avail-search').value || '').toLowerCase();
+  const f = document.getElementById('avail-filter').value;
+  const items = LISTS['availability'].items.filter(w => {
+    const matchSearch = !s || (w.Name||'').toLowerCase().includes(s) || (w.Role||'').toLowerCase().includes(s);
+    const statusMap = { available: 'Available', unavailable: 'Unavailable', date: 'Available from date', unknown: 'Not set' };
+    const matchFilter = !f || (w.Status || 'Not set') === (statusMap[f] || f);
+    return matchSearch && matchFilter;
+  });
+
+  const grid = document.getElementById('avail-admin-grid');
+  if (!items.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>No Bench Warmers found.</p></div>';
+    return;
+  }
+
+  grid.innerHTML = items.map(w => {
+    const statusClass = w.Status === 'Available' ? 'available'
+                      : w.Status === 'Unavailable' ? 'unavailable'
+                      : w.Status === 'Available from date' ? 'date' : '';
+    const statusLabel = w.Status || 'Not set';
+    const dateLabel = w.Status === 'Available from date' && w.Available_From
+      ? '<div style="font-size:11.5px;color:#1a5fbd;margin-top:3px;">From ' + new Date(w.Available_From + 'T00:00:00').toLocaleDateString('en-AU', {day:'numeric',month:'short',year:'numeric'}) + '</div>' : '';
+    return `<div class="avail-card">
+      <div class="avail-card-name">${w.Name}</div>
+      <div class="avail-card-role">${w.Role || ''}</div>
+      <div style="margin-bottom:.5rem;">
+        <span class="avail-status-badge ${statusClass}">${statusLabel}</span>
+        ${dateLabel}
+      </div>
+      ${w.Last_Updated ? '<div class="avail-last-updated">Updated ' + w.Last_Updated + '</div>' : ''}
+    </div>`;
+  }).join('');
+}
+
+function updateAvailDashCount() {
+  const items = LISTS['availability'].items;
+  const avail = items.filter(w => w.Status === 'Available' || w.Status === 'Available from date').length;
+  const unavail = items.filter(w => w.Status === 'Unavailable').length;
+  const a = document.getElementById('dash-avail-available');
+  const u = document.getElementById('dash-avail-unavailable');
+  if (a) a.textContent = avail + ' available';
+  if (u) u.textContent = unavail + ' unavailable';
+}
+
+function openAddBenchWarmerModal() {
+  document.getElementById('detail-modal-title').textContent = 'Add Bench Warmer';
+  document.getElementById('detail-modal-body').innerHTML = `
+    <div class="form-group"><label class="form-label">Name <span style="color:#c0392b">*</span></label><input class="form-input" id="add-bw-name" placeholder="Full name" /></div>
+    <div class="form-group"><label class="form-label">Role / Title</label><input class="form-input" id="add-bw-role" placeholder="e.g. Senior Associate" /></div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="add-bw-email" placeholder="name@email.com" /></div>`;
+  document.getElementById('detail-modal-footer').innerHTML =
+    `<button class="btn btn-secondary" onclick="closeModal('detail-modal')">Cancel</button>
+     <button class="btn btn-primary" onclick="addBenchWarmer()">Add</button>`;
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function addBenchWarmer() {
+  const name = document.getElementById('add-bw-name').value.trim();
+  if (!name) { document.getElementById('add-bw-name').style.borderColor = '#dc2626'; return; }
+  const item = {
+    _id: Date.now(),
+    Name: name,
+    Role: document.getElementById('add-bw-role').value.trim(),
+    Email: document.getElementById('add-bw-email').value.trim(),
+    Status: 'Not set',
+    Available_From: '',
+    Last_Updated: ''
+  };
+  LISTS['availability'].items.unshift(item);
+  saveLists();
+  updateListCounts();
+  updateAvailDashCount();
+  populateWarmerSelect();
+  closeModal('detail-modal');
+  showToast(name + ' added!', 'success');
+}
+
+// ── CV PROCESSOR ──────────────────────────────────────────────────────────────
+let cvFile = null;
+let cvFileData = null;
+const CV_HISTORY_KEY = 'thebench_cv_history';
+let cvHistory = [];
+
+function loadCVHistory() {
+  try {
+    const raw = localStorage.getItem(CV_HISTORY_KEY);
+    if (raw) cvHistory = JSON.parse(raw);
+    renderCVHistory();
+  } catch(e) {}
+}
+
+function saveCVHistory() {
+  try { localStorage.setItem(CV_HISTORY_KEY, JSON.stringify(cvHistory.slice(0, 20))); } catch(e) {}
+}
+
+function renderCVHistory() {
+  const el = document.getElementById('cv-history');
+  if (!cvHistory.length) {
+    el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:13px;">No profiles generated yet.</div>';
+    return;
+  }
+  el.innerHTML = cvHistory.map((h, i) => `
+    <div class="cv-history-item">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="width:16px;height:16px;color:var(--green-dark);flex-shrink:0;"><rect x="3" y="2" width="10" height="12" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="7" x2="11" y2="7"/><line x1="5" y1="9" x2="8" y2="9"/></svg>
+      <div class="cv-history-name">${h.name}</div>
+      <div class="cv-history-date">${h.date}</div>
+      <button class="link-btn" onclick="loadHistoryItem(${i})">View <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 2 10 6 5 10"/></svg></button>
+    </div>`).join('');
+  const countEl = document.getElementById('dash-cv-count');
+  if (countEl) countEl.textContent = cvHistory.length + ' profile' + (cvHistory.length !== 1 ? 's' : '') + ' generated';
+}
+
+function loadHistoryItem(i) {
+  const h = cvHistory[i];
+  if (!h) return;
+  renderProfileOutput(h.html, h.name);
+}
+
+function cvFileSelected(input) {
+  if (!input.files[0]) return;
+  cvFile = input.files[0];
+  document.getElementById('cv-file-name').textContent = cvFile.name;
+  document.getElementById('cv-file-size').textContent = (cvFile.size / 1024).toFixed(1) + ' KB';
+  document.getElementById('cv-file-info').style.display = 'flex';
+  document.getElementById('cv-generate-btn').disabled = false;
+  readFileAsBase64(cvFile);
+}
+
+function readFileAsBase64(file) {
+  const reader = new FileReader();
+  reader.onload = e => { cvFileData = e.target.result.split(',')[1]; };
+  reader.readAsDataURL(file);
+}
+
+function clearCV() {
+  cvFile = null;
+  cvFileData = null;
+  document.getElementById('cv-file-input').value = '';
+  document.getElementById('cv-file-info').style.display = 'none';
+  document.getElementById('cv-generate-btn').disabled = true;
+}
+
+function cvDragOver(e) { e.preventDefault(); document.getElementById('cv-drop-zone').classList.add('dragover'); }
+function cvDragLeave(e) { document.getElementById('cv-drop-zone').classList.remove('dragover'); }
+function cvDrop(e) {
+  e.preventDefault();
+  document.getElementById('cv-drop-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && (file.type === 'application/pdf' || file.name.endsWith('.docx'))) {
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    document.getElementById('cv-file-input').files = dt.files;
+    cvFileSelected(document.getElementById('cv-file-input'));
+  }
+}
+
+async function generateProfile() {
+  if (!cvFile || !cvFileData) return;
+
+  // Show processing state
+  document.getElementById('cv-output-body').innerHTML = `
+    <div class="cv-processing">
+      <div class="cv-processing-spinner"></div>
+      <p>Reading CV and generating Bench Player Profile…</p>
+      <p style="margin-top:6px;font-size:11.5px;color:var(--text-muted);">This usually takes 15–30 seconds.</p>
+    </div>`;
+  document.getElementById('cv-output-actions').style.display = 'none';
+  document.getElementById('cv-generate-btn').disabled = true;
+
+  const mediaType = cvFile.type === 'application/pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+  const prompt = `You are processing a CV to reformat it into The Bench's branded "Bench Player Profile" format.
+
+CRITICAL RULES:
+- Only use information explicitly stated in the CV. Do not invent, infer, or add anything not present.
+- If a section has no data in the CV (e.g. no career highlights), omit that section entirely.
+- Preserve the person's exact words where possible, especially in summaries and achievement descriptions.
+- The "Expertise" section should only appear if the CV contains clear skill/expertise areas.
+- The "Career Highlights" section should only appear if the CV contains notable achievements per role.
+- The "Qualifications" section should only appear if the CV lists qualifications/education.
+- The "Affiliations & Other" section should only appear if the CV lists affiliations, memberships, or other items.
+
+OUTPUT: Respond with a valid JSON object only. No markdown, no explanation, just JSON.
+
+{
+  "name": "Full name",
+  "role": "Current role/title at The Bench or most recent role",
+  "email": "email if present, else null",
+  "location": "location if present, else null",
+  "summary": "Professional summary paragraph",
+  "expertise": [
+    { "header": "Category name", "points": ["point 1", "point 2", "point 3"] }
+  ],
+  "experience": [
+    { "org": "Organisation", "role": "Role title", "dates": "Date range" }
+  ],
+  "highlights": [
+    { "org": "Organisation", "role": "Role title", "achievement": "Achievement description" }
+  ],
+  "qualifications": ["Qualification 1", "Qualification 2"],
+  "affiliations": ["Affiliation 1", "Affiliation 2"]
+}
+
+If expertise/highlights/qualifications/affiliations are not present in the CV, return them as empty arrays [].`;
+
+  try {
+    const response = await fetch('/api/anthropic', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'document', source: { type: 'base64', media_type: mediaType, data: cvFileData } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content?.find(b => b.type === 'text')?.text || '';
+    const clean = text.replace(/```json|```/g, '').trim();
+    const profile = JSON.parse(clean);
+    const html = buildProfileHTML(profile);
+    const name = profile.name || cvFile.name.replace(/\.[^.]+$/, '');
+
+    // Save to history
+    cvHistory.unshift({ name, date: new Date().toLocaleDateString('en-AU'), html });
+    saveCVHistory();
+    renderCVHistory();
+
+    renderProfileOutput(html, name);
+    showToast('Profile generated!', 'success');
+
+  } catch(err) {
+    document.getElementById('cv-output-body').innerHTML = `
+      <div style="padding:1.5rem;text-align:center;color:#dc2626;">
+        <p style="font-weight:700;">Something went wrong</p>
+        <p style="font-size:12.5px;margin-top:6px;color:var(--text-muted);">${err.message}</p>
+      </div>`;
+    showToast('Generation failed — check console for details.');
+  }
+  document.getElementById('cv-generate-btn').disabled = false;
+}
+
+function buildProfileHTML(p) {
+  let html = `<div class="bpp" id="bpp-printable">`;
+
+  // Header
+  html += `<div class="bpp-header">
+    <div class="bpp-title"><span>Bench Player</span> Profile</div>
+    <div class="bpp-name">${p.name || ''}</div>
+    <div class="bpp-role">${p.role || ''}</div>
+    <div class="bpp-contact">`;
+  if (p.email) html += `<span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="12" height="9" rx="1.5"/><polyline points="2 6 8 10 14 6"/></svg> ${p.email}</span>`;
+  if (p.location) html += `<span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="7" r="3"/><path d="M8 2C5.24 2 3 4.24 3 7c0 3.5 5 9 5 9s5-5.5 5-9c0-2.76-2.24-5-5-5z"/></svg> ${p.location}</span>`;
+  html += `</div>`;
+  if (p.summary) html += `<div class="bpp-summary">${p.summary}</div>`;
+  html += `</div>`;
+
+  // Expertise
+  if (p.expertise && p.expertise.length) {
+    html += `<div class="bpp-section-title">Expertise</div>`;
+    html += `<div class="bpp-expertise-grid">`;
+    html += `<div style="display:contents;">`;
+    p.expertise.forEach(col => {
+      html += `<div class="bpp-expertise-col-header">${col.header}</div>`;
+    });
+    html += `</div>`;
+    const maxRows = Math.max(...p.expertise.map(c => c.points.length));
+    for (let i = 0; i < maxRows; i++) {
+      html += `<div style="display:contents;" class="bpp-expertise-row">`;
+      p.expertise.forEach(col => {
+        html += `<div class="bpp-expertise-cell">${col.points[i] || ''}</div>`;
+      });
+      html += `</div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Experience
+  if (p.experience && p.experience.length) {
+    html += `<div class="bpp-section-title">Experience</div>`;
+    html += `<table class="bpp-exp-table">`;
+    p.experience.forEach(e => {
+      html += `<tr><td class="bpp-exp-org">${e.org}</td><td class="bpp-exp-role">${e.role}</td><td class="bpp-exp-dates">${e.dates}</td></tr>`;
+    });
+    html += `</table>`;
+  }
+
+  // Career Highlights
+  if (p.highlights && p.highlights.length) {
+    html += `<div class="bpp-section-title">Career Highlights</div>`;
+    html += `<table class="bpp-highlights-table"><thead><tr><th class="bpp-hl-role">Role</th><th>Achievements</th></tr></thead><tbody>`;
+    p.highlights.forEach(h => {
+      html += `<tr><td class="bpp-hl-role"><strong>${h.org}</strong><br/><span style="font-weight:400;color:var(--text-muted);font-size:11.5px;">${h.role}</span></td><td>${h.achievement}</td></tr>`;
+    });
+    html += `</tbody></table>`;
+  }
+
+  // Qualifications + Affiliations
+  const hasQual = p.qualifications && p.qualifications.length;
+  const hasAffil = p.affiliations && p.affiliations.length;
+  if (hasQual || hasAffil) {
+    html += `<div class="bpp-two-col">`;
+    if (hasQual) {
+      html += `<div><div class="bpp-section-title">Qualifications</div><ul class="bpp-list">`;
+      p.qualifications.forEach(q => html += `<li>${q}</li>`);
+      html += `</ul></div>`;
+    }
+    if (hasAffil) {
+      html += `<div><div class="bpp-section-title">Affiliations & Other</div><ul class="bpp-list">`;
+      p.affiliations.forEach(a => html += `<li>${a}</li>`);
+      html += `</ul></div>`;
+    }
+    html += `</div>`;
+  }
+
+  html += `<div class="bpp-footer">All Bench Player referrals are subject to The Bench (Aus)'s Standard Terms &amp; Conditions unless otherwise agreed in writing.<br/>© The Bench (Aus), ${new Date().getFullYear()}</div>`;
+  html += `</div>`;
+  return html;
+}
+
+function renderProfileOutput(html, name) {
+  document.getElementById('cv-output-body').innerHTML = html;
+  const actions = document.getElementById('cv-output-actions');
+  actions.style.display = 'flex';
+}
+
+function printProfile() {
+  const content = document.getElementById('bpp-printable');
+  if (!content) return;
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>Bench Player Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Aptos:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+      body{font-family:'Aptos','Calibri Light',Calibri,sans-serif;font-size:13px;color:#333;padding:2rem;max-width:800px;margin:0 auto;}
+      ${document.querySelector('style').innerHTML}
+    </style></head><body>${content.outerHTML}</body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 500);
+}
+
+// ── UTILITIES ─────────────────────────────────────────────────────────────────
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeModalOnBackdrop(e, id) { if (e.target === e.currentTarget) closeModal(id); }
+
+let toastT;
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = msg;
+  t.className = 'toast show' + (type === 'success' ? ' success' : '');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function copyLink() {
+  navigator.clipboard.writeText(document.getElementById('share-url').value).catch(() => {});
+  showToast('Link copied!', 'success');
+}
+
+let statusOn = true;
+function toggleFormStatus() {
+  statusOn = !statusOn;
+  document.getElementById('status-knob').style.right = statusOn ? '2px' : '20px';
+  document.getElementById('form-status-toggle').style.background = statusOn ? 'var(--green)' : 'var(--grey-light)';
+  document.getElementById('status-label').innerHTML = statusOn ? 'Form is <strong>Live</strong> — accepting responses' : 'Form is <strong>Paused</strong> — not accepting responses';
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+loadAllResponses(); // restore responses from localStorage on page load
+loadAllLists();
+loadCVHistory();
+populateWarmerSelect();
+updateAvailDashCount();
+selectForm('new-project');
+updateDashCount();
+updateListCounts();
+
+// ── AUTHENTICATION & ROLE-BASED ACCESS ───────────────────────────────────────
+
+const ADMIN_EMAILS = [
+  'aidan@thebench.au',
+  'anthony@thebench.au',
+  'charlie.simpson@thebench.au'
+];
+
+const ADMIN_ONLY_VIEWS = ['lists','sharepoint'];
+
+// MSAL configuration
+const msalConfig = {
+  auth: {
+    clientId: '82b9a5bb-64ae-42e5-9776-13dd728844d8',
+    authority: 'https://login.microsoftonline.com/ba4d31a9-4750-43e1-8a95-7ded08d4dd45',
+    redirectUri: window.location.origin + window.location.pathname,
+  },
+  cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false }
+};
+
+let msalInstance = null;
+let currentUser = null;
+let currentRole = 'benchwarmer';
+
+async function initAuth() {
+  try {
+    // Handle redirect response (called after Microsoft redirects back)
+    const response = await msalInstance.handleRedirectPromise();
+    if (response) {
+      handleAuthResponse(response);
+      return;
+    }
+    // Check for existing session
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length > 0) {
+      currentUser = accounts[0];
+      onSignedIn();
+    }
+    // else: login screen stays visible
+  } catch (e) {
+    console.error('Auth init error:', e);
+  }
+}
+
+function handleAuthResponse(response) {
+  if (response && response.account) {
+    currentUser = response.account;
+    onSignedIn();
+  }
+}
+
+function onSignedIn() {
+  const email = (currentUser.username || '').toLowerCase();
+  currentRole = ADMIN_EMAILS.includes(email) ? 'admin' : 'benchwarmer';
+
+  // Hide login screen, show app
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('user-bar').style.display = 'flex';
+
+  // User bar
+  const name = currentUser.name || email;
+  document.getElementById('user-name').textContent = name;
+  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('user-initials').textContent = initials;
+  const badge = document.getElementById('user-role-badge');
+  badge.textContent = currentRole === 'admin' ? 'Admin' : 'Bench Warmer';
+  badge.className = 'user-bar-role ' + (currentRole === 'admin' ? 'admin' : 'benchwarmer');
+
+  applyRole();
+}
+
+async function signIn() {
+  document.getElementById('login-loading').style.display = 'block';
+  document.getElementById('login-error').style.display = 'none';
+  try {
+    await msalInstance.loginRedirect({
+      scopes: ['User.Read', 'Sites.ReadWrite.All', 'Mail.Send']
+    });
+  } catch (e) {
+    document.getElementById('login-loading').style.display = 'none';
+    document.getElementById('login-error').style.display = 'block';
+    console.error('Sign-in error:', e);
+  }
+}
+
+function signOut() {
+  msalInstance.logoutRedirect({ account: currentUser });
+}
+
+function applyRole() {
+  const isAdmin = currentRole === 'admin';
+
+  // Nav visibility
+  document.getElementById('nav-lists').style.display      = isAdmin ? '' : 'none';
+  document.getElementById('nav-sharepoint').style.display = isAdmin ? '' : 'none';
+
+  // Role toggle pill (still visible for admins to verify role)
+  const pill = document.getElementById('role-pill');
+  if (pill) {
+    pill.textContent = isAdmin ? 'Admin' : 'Bench Warmer';
+    pill.className = 'role-pill ' + (isAdmin ? 'admin' : 'benchwarm');
+  }
+
+  // Redirect away from admin-only views if benchwarmer
+  const activeView = document.querySelector('.view.active');
+  if (!isAdmin && activeView) {
+    const vid = activeView.id.replace('view-', '');
+    if (ADMIN_ONLY_VIEWS.includes(vid)) showView('dashboard');
+  }
+
+  // Dashboard cards
+  const listsCard = document.querySelector('.module-card[onclick*=\'lists\']');
+  const spCard    = document.querySelector('.module-card[onclick*=\'sharepoint\']');
+  if (listsCard) listsCard.style.display = isAdmin ? '' : 'none';
+  if (spCard)    spCard.style.display    = isAdmin ? '' : 'none';
+}
+
+function toggleRole() {
+  // Keep dev toggle for admin users only (hidden in production)
+  if (currentRole !== 'admin') return;
+  const pill = document.getElementById('role-pill');
+  const previewingAs = pill && pill.dataset.preview === 'benchwarmer' ? 'admin' : 'benchwarmer';
+  if (pill) pill.dataset.preview = previewingAs;
+
+  const isAdmin = previewingAs === 'admin';
+  document.getElementById('nav-lists').style.display      = isAdmin ? '' : 'none';
+  document.getElementById('nav-sharepoint').style.display = isAdmin ? '' : 'none';
+  if (pill) {
+    pill.textContent = isAdmin ? 'Admin (you)' : 'Bench Warmer preview';
+    pill.className = 'role-pill ' + (isAdmin ? 'admin' : 'benchwarm');
+  }
+  const listsCard = document.querySelector('.module-card[onclick*=\'lists\']');
+  const spCard    = document.querySelector('.module-card[onclick*=\'sharepoint\']');
+  if (listsCard) listsCard.style.display = isAdmin ? '' : 'none';
+  if (spCard)    spCard.style.display    = isAdmin ? '' : 'none';
+  if (!isAdmin) {
+    const activeView = document.querySelector('.view.active');
+    if (activeView) {
+      const vid = activeView.id.replace('view-', '');
+      if (ADMIN_ONLY_VIEWS.includes(vid)) showView('dashboard');
+    }
+  }
+  showToast('Previewing as ' + (isAdmin ? 'Admin' : 'Bench Warmer'));
+}
+
+// ── LOCAL TESTING BYPASS ──────────────────────────────────────────────────────
+// Remove this function before deploying to production
+function bypassLogin() {
+  const val = document.getElementById('bypass-role').value;
+  const users = {
+    'admin-aidan':   { name: 'Aidan',           email: 'aidan@thebench.au' },
+    'admin-anthony': { name: 'Anthony',          email: 'anthony@thebench.au' },
+    'admin-charlie': { name: 'Charlie Simpson',  email: 'charlie.simpson@thebench.au' },
+    'benchwarmer':   { name: 'Bench Warmer',     email: 'user@thebench.au' },
+  };
+  const u = users[val];
+  currentUser = { name: u.name, username: u.email };
+  onSignedIn();
+}
+</script>
+</body>
+</html>
